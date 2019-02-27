@@ -1,5 +1,7 @@
 # adminAuth User Management
 
+**State:** draft
+
 ## Summary
 
 We need to make it much easier to secure Node-RED for first-time users. Today,

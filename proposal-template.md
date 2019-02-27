@@ -1,26 +1,28 @@
+> To get started with this template:
+>
+> 1. **Make a copy of this template.** Copy this template into the `designs`
+>   folder and name it `my-title.md`. If the proposal will include images, a folder
+>   should be created for the proposal and its images: `my-title/my-title.md`.
+>   
+>    Remember to delete this getting started text!
+>
+> 2. **Create an initial proposal.** The proposal should set out the high-level
+>   goals of the feature with enough detail to review the intent and direction of the
+>   feature.
+>
+> 3. **Create a pull request.** This will be used to drive discussion on the
+>   proposal. The goal is to merge proposals early and not try to tackle everything
+>   in a single go.
+>
+> 4. **Develop the design.** The discussion on the design will provide guidance
+>   on what further material is needed.
+
 # Title
 
 This is the title of the proposal. It should communicate the key purpose of the
 proposal and will be how it is referred to in general discussion.
 
-
-To get started with this template:
-
-1. **Make a copy of this template.** Copy this template into the `0-initial`
-  folder and name it `my-title.md`. If the proposal will include images, a folder
-  should be created for the proposal and its images: `my-title/my-title.md`
-
-2. **Create an initial proposal.** The proposal should set out the high-level
-  goals of the feature with enough detail to review the intent and direction of the
-  feature.
-
-3. **Create a pull request.** This will be used to drive discussion on the
-  proposal. The goal is to merge proposals early and not try to tackle everything
-  in a single go.
-
-4. **Develop the design.** The discussion on the design will provide guidance
-  on what further material is needed.
-
+**State:** draft | in-progress | complete
 
 ## Summary
 

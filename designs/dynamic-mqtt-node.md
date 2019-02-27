@@ -1,5 +1,7 @@
 # Dynamic MQTT Node
 
+**State:** draft
+
 ## Summary
 
 There is a requirement for the MQTT nodes to allow for more dynamic configuration.

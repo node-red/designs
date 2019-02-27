@@ -1,5 +1,7 @@
 # Function Library node
 
+**State:** draft
+
 ## Summary
 
 We have seen a growing number of users who are inserting JavaScript into global

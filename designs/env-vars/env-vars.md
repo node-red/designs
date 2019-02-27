@@ -1,5 +1,7 @@
 # Environment Variables
 
+**State:** in-progress
+
 ## Summary
 
 We currently allow any node configuration property to be set from an environment variable. The node property should be set to a value of `$(ENV_VAR)` and the runtime will insert the value of `ENV_VAR` before passing the configuration to the node.
