@@ -1,6 +1,8 @@
-# Flow Manipulation API
+---
+state: in-progress
+---
 
-**State:** in-progress
+# Flow Manipulation API
 
 ## Summary
 

@@ -1,6 +1,8 @@
-# Function Library node
+---
+state: draft
+---
 
-**State:** draft
+# Function Library node
 
 ## Summary
 

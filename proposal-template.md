@@ -1,10 +1,15 @@
+---
+state: draft | in-progress | complete
+---
+
 > To get started with this template:
 >
 > 1. **Make a copy of this template.** Copy this template into the `designs`
 >   folder and name it `my-title.md`. If the proposal will include images, a folder
->   should be created for the proposal and its images: `my-title/my-title.md`.
+>   should be created for the proposal and its images: `my-title/README.md`.
 >   
->    Remember to delete this getting started text!
+>    Remember to delete this getting started text - but ensure the YAML
+>    header above remains.
 >
 > 2. **Create an initial proposal.** The proposal should set out the high-level
 >   goals of the feature with enough detail to review the intent and direction of the
@@ -21,8 +26,6 @@
 
 This is the title of the proposal. It should communicate the key purpose of the
 proposal and will be how it is referred to in general discussion.
-
-**State:** draft | in-progress | complete
 
 ## Summary
 

@@ -1,6 +1,8 @@
-# adminAuth User Management
+---
+state: draft
+---
 
-**State:** draft
+# adminAuth User Management
 
 ## Summary
 

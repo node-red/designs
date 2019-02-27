@@ -1,6 +1,8 @@
-# Dynamic MQTT Node
+---
+state: draft
+---
 
-**State:** draft
+# Dynamic MQTT Node
 
 ## Summary
 

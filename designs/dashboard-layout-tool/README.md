@@ -1,6 +1,8 @@
-# Dashboard Layout Tool
+---
+state: in-progress
+---
 
-**State:** in-progress
+# Dashboard Layout Tool
 
 ## Summary
 User cannot visually design a layout of dashboard widgets.  This layout tool
