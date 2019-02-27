@@ -23,7 +23,7 @@ to set these properties.
 
 Next figure shows a process to define new parameter settings UI for a SUBFLOW.
 
-![Subflow-dev-process](Subflow-dev-process.png)
+![Subflow-dev-process](images/Subflow-dev-process.png)
 
 **UI Edit Panel** is added to **SUBFLOW Template Edit Panel** of a SUBFLOW.  Simple parameter setting UI for the SUBFLOW can be created using this panel by adding UI items on UI items list.  Created UI can be previewed by clicking **preview** button or selecting preview tab.
 
@@ -37,11 +37,11 @@ Each UI item defined in UI Edit Panel can store the defined value into two kinds
 
 **Edit UI Panel** have **add** button at the bottom.  By clicking this button, new UI item  can be added to UI items list.  UI items are shown from top to bottom in generated parameter settings UI.  Order of UI items can be rearragned by dragging an item in the list.
 
-![UI-edit-panel](UI-edit-panel.png)
+![UI-edit-panel](images/UI-edit-panel.png)
 
 UI item definition consists of following sub-items:
 
-![UI-element](UI-element01.png)
+![UI-element](images/UI-element01.png)
 
 - **name** - name of defined UI item. Used to access input value.
 
@@ -49,7 +49,7 @@ UI item definition consists of following sub-items:
 
   **label** field appearance is as follows:
 
-  ![field-label](field-label.png)
+  ![field-label](images/field-label.png)
 
 - **type** - type of defined item. Currently following types are supported:
 
@@ -68,7 +68,7 @@ UI item definition consists of following sub-items:
 
   **type** field appearance is as follows:
 
-  ![field-type](field-type.png)
+  ![field-type](images/field-type.png)
 
 - **tgt. type** - type of target to which input value is stored.  Curtly supported tgt. types are as follow:
 
@@ -81,17 +81,17 @@ UI item definition consists of following sub-items:
 
   **tgt. type** field appearance is as follows:
 
-  ![field-tgt](field-tgt.png)
+  ![field-tgt](images/field-tgt.png)
 
 - **target** - specification of target for selected **tgt. type**.
 
   If **tgt. type** is **env var**, **target** field appearance is as follows:
 
-  ![field-target-envvar](field-target-envvar.png)
+  ![field-target-envvar](images/field-target-envvar.png)
 
   If **tgt. type** is **node property**, **target** field appearance is as follows:
 
-  ![field-target-target](field-target-target.png)
+  ![field-target-target](images/field-target-target.png)
 
 - **type specific inputs** - input items specific to each UI item type.
 
@@ -103,13 +103,13 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-simple](UI-def-simple.png)
+  ![UI-def-simple](images/UI-def-simple.png)
 
   - **initial value** accepts a value of type specified by **<type>** field.
 
 - UI Appearance
 
-  ![UI-app-simple](UI-app-simple.png)
+  ![UI-app-simple](images/UI-app-simple.png)
 
 - Environment Variable
 
@@ -123,14 +123,14 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-any](UI-def-any0.png)
+  ![UI-def-any](images/UI-def-any0.png)
 
   - A set of candidate types can be selected by checkbox.
   - Initial value can be defined using **initial value** field.
 
 - UI Appearance
 
-  ![UI-app-any](UI-app-any.png)
+  ![UI-app-any](images/UI-app-any.png)
 
   - A value can be input using **TypedInput** interface.
 
@@ -142,11 +142,11 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-label](UI-def-label.png)
+  ![UI-def-label](images/UI-def-label.png)
 
 - UI Appearance
 
-  ![UI-app-label](UI-app-label.png)
+  ![UI-app-label](images/UI-app-label.png)
 
 - Environment Variable
 
@@ -159,14 +159,14 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-menu](UI-def-menu.png)
+  ![UI-def-menu](images/UI-def-menu.png)
 
   - menu items are defined by adding *item label* (with locale) and its *value* pair.
   - initial value of menu can be defined using **initial value** menu.
 
 - UI Appearance
 
-  ![UI-app-menu](UI-app-menu.png)
+  ![UI-app-menu](images/UI-app-menu.png)
 
 - Environment Variable
 
@@ -180,13 +180,13 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-checkbox](UI-def-checkbox.png)
+  ![UI-def-checkbox](images/UI-def-checkbox.png)
 
   - initial value (**true** or **false**) can be defined by **initial value** field.
 
 - UI Appearance
 
-  ![UI-app-checkbox](UI-app-checkbox.png)
+  ![UI-app-checkbox](images/UI-app-checkbox.png)
 
   - item label is shown after check box.
 
@@ -202,13 +202,13 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-spinner](UI-def-spinner.png)
+  ![UI-def-spinner](images/UI-def-spinner.png)
 
   - initial value can be defined by **initial value** field.
 
 - UI Appearance
 
-  ![UI-app-spinner](UI-app-spinner.png)
+  ![UI-app-spinner](images/UI-app-spinner.png)
 
 - Environment Variable
 
@@ -222,13 +222,13 @@ This section describes UI definition, UI appearance, and environment variable de
 
 - UI Definition
 
-  ![UI-def-node](UI-def-node.png)
+  ![UI-def-node](images/UI-def-node.png)
 
   - **filter** specifies a regular expression that filters node type.
 
 - UI Appearance
 
-  ![UI-app-node](UI-app-node.png)
+  ![UI-app-node](images/UI-app-node.png)
 
 - environment variable
 
