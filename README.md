@@ -29,6 +29,8 @@ with enough detail to review the intent and direction of the feature.
  - [adminAuth User Management](designs/adminAuth-user-management.md)
  - [Function Library Node](designs/function-library-node.md)
  - [Subflow Node Modules](designs/subflow-node-modules.md)
+ - [Runnable Projects](designs/runnable-projects.md)
+ - [Dynamic MQTT Node](designs/dynamic-mqtt-node.md)
 
 #### In-progress
 
@@ -38,6 +40,7 @@ for designs that are actively being worked on beyond the high-level detail.
  - [Dashboard Layout Tool](designs/dashboard-layout-tool)
  - [Environment Variables](designs/env-vars)
  - [Flow Manipulation API](designs/flow-manipulation-api)
+ - [Node Messaging API](designs/node-messaging-api.md)
 
 #### Complete
 
