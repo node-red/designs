@@ -12,6 +12,8 @@ If the discussion results in an agreed plan to create a design note, a pull
 request should be opened in this repository to add a new design note to the `designs`
 folder.
 
+If the design requires images, create a subfolder for the proposal.
+
 The design note *must* use the [proposal-template](proposal-template.md) provided.
 
 ### Design proposals
@@ -33,9 +35,9 @@ with enough detail to review the intent and direction of the feature.
 Through consensus, the design can moved to the `in-progress` state. This is
 for designs that are actively being worked on beyond the high-level detail.
 
- - [Dashboard Layout Tool](designs/dashboard-layout-tool/dashboard-layout-tool)
- - [Environment Variables](designs/env-vars/env-vars)
- - [Flow Manipulation API](designs/flow-manipulation-api/flow-manipulation-api)
+ - [Dashboard Layout Tool](designs/dashboard-layout-tool)
+ - [Environment Variables](designs/env-vars)
+ - [Flow Manipulation API](designs/flow-manipulation-api)
 
 #### Complete
 
