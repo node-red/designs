@@ -33,6 +33,7 @@ with enough detail to review the intent and direction of the feature.
 Through consensus, the design can moved to the `in-progress` state. This is
 for designs that are actively being worked on beyond the high-level detail.
 
+ - [Dashboard Layout Tool](designs/dashboard-layout-tool/dashboard-layout-tool)
  - [Environment Variables](designs/env-vars/env-vars)
 
 #### Complete
