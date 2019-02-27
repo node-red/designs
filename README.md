@@ -26,9 +26,9 @@ discussion and review.
 At this stage, the proposal should set out the high-level goals of the feature
 with enough detail to review the intent and direction of the feature.
 
- - [adminAuth User Management](designs/adminAuth-user-management)
- - [Function Library Node](designs/function-library-node)
- - [Subflow Node Modules](designs/subflow-node-modules)
+ - [adminAuth User Management](designs/adminAuth-user-management.md)
+ - [Function Library Node](designs/function-library-node.md)
+ - [Subflow Node Modules](designs/subflow-node-modules.md)
 
 #### In-progress
 
