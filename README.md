@@ -31,12 +31,14 @@ with enough detail to review the intent and direction of the feature.
  - [Subflow Node Modules](designs/subflow-node-modules.md)
  - [Runnable Projects](designs/runnable-projects.md)
  - [Dynamic MQTT Node](designs/dynamic-mqtt-node.md)
+ - [Exportable Subflow](designs/exportable-subflow.md)
 
 #### In-progress
 
 Through consensus, the design can moved to the `in-progress` state. This is
 for designs that are actively being worked on beyond the high-level detail.
 
+ - [Subflow Property UI](designs/subflow-property-ui)
  - [Dashboard Layout Tool](designs/dashboard-layout-tool)
  - [Environment Variables](designs/env-vars)
  - [Flow Manipulation API](designs/flow-manipulation-api)
