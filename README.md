@@ -24,13 +24,21 @@ discussion and review.
 At this stage, the proposal should set out the high-level goals of the feature
 with enough detail to review the intent and direction of the feature.
 
+ - [adminAuth User Management](designs/adminAuth-user-management)
+ - [Function Library Node](designs/function-library-node)
+ - [Subflow Node Modules](designs/subflow-node-modules)
+
 #### In-progress
 
 Through consensus, the design can moved to the `in-progress` state. This is
 for designs that are actively being worked on beyond the high-level detail.
+
+ - [Environment Variables](designs/env-vars/env-vars)
 
 #### Complete
 
 Once a design has been implemented it should be updated to the `complete` state.
 The design should be updated to include references to where it has been implemented -
 such as the release it is included in.
+
+ - *none*
