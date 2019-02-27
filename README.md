@@ -35,6 +35,7 @@ for designs that are actively being worked on beyond the high-level detail.
 
  - [Dashboard Layout Tool](designs/dashboard-layout-tool/dashboard-layout-tool)
  - [Environment Variables](designs/env-vars/env-vars)
+ - [Flow Manipulation API](designs/flow-manipulation-api/flow-manipulation-api)
 
 #### Complete
 
