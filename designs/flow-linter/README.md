@@ -57,14 +57,14 @@ Following code shows example of plug-in, that checks existance of name of functi
 
 ```javascript
 function check (afs, conf, cxt) {
-    const funcs = [...afs]               // extract all nodes 
-        .filter(e => e.type==='function')  // filter out unrelated nodes
-        .map(e => {
+    var funcs = afs.getAllNodesArray();  // extract all nodes 
+        .filter(function(e) {return e.type==='function';}) // filter out unrelated nodes
+        .map(function(e) {
             return {id:e.id, name:e.name}; // extract their node id and name
         });
-    const verified = funcs
-        .filter(e=> e.name === undefined || e.name === "")  // check existance of name
-        .map(e=> {
+    var verified = funcs
+        .filter(function(e) {return e.name === undefined || e.name === "";})// check existance of name
+        .map(function(e) {
             return {rule:"no-func-name", id:e.id, result:conf}; // generate result
         });
 
@@ -85,6 +85,9 @@ module.exports = {
   - [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) defines the protocol used between an editor and a language server that provides language features like lint.  It may be alternative option to implement lint function as a language server embedded in a Node-RED server.
     - Language Server Protocol itself is aimed for line-oriented text programming languages.  It is not suitable for visual programming language like Node-RED.  If we adopt the LSP, We might incorporate only their 'Client-Server' architecture, and not incorporate their protocol or data model.
     - If we adopt this architecture, the linter need not to generate code for server and browser.  But we have to estimate an overhead to send flow object from browser to server.
+
+The code generation mechanism is shown in below.
+![Generating Code](code-generation.png)
 
 #### Configuration
 Linter reads configuration files in following order:
