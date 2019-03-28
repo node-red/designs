@@ -36,7 +36,7 @@ This is important for when you want to have multiple instances running and inter
 These proposed API will be added to the [Context Store API](https://nodered.org/docs/api/context/methods/).  
 The context plugin (e.g. memory, localfilesysytem) should create that implements these API.
 
-#### incr/decr
+#### incr
 
 - ContextStore.incr(scope, key, [amount], [callback])  
   
@@ -46,25 +46,15 @@ The context plugin (e.g. memory, localfilesysytem) should create that implements
   | key       | `string`   | the key to increment the value for.                                    |
   | amount    | `number`   | _optional_ the amount to increment by. Default : `1`                   |
   | callback  | `function` | _optional_ a callback function to invoke when the value is incremented |
- 
-- ContextStore.decr(scope, key, [amount], [callback])
-  
-  | Argument  | Type       | Description                                                            |
-  | --------- | :--------: | ---------------------------------------------------------------------- |
-  | scope     | `string`   | the scope of the key                                                   |
-  | key       | `string`   | the key to decrement the value for.                                    |
-  | amount    | `number`   | _optional_ the amount to decrement by. Default : `1`                   |
-  | callback  | `function` | _optional_ a callback function to invoke when the value is decremented |
-
 
 ##### Description
 
-These APIs increments/decrements the value by one or passed amount. If the key does not exist, it is set to 0 before performing the operation.  
+This API increments the value by one or passed `amount`. Pass a negative value to `amount` to decrement the value of the key.
+If the key does not exist, it is set to 0 before performing the operation.  
 
-If no callback is provided, and the store supports synchronous access, the incr/decr function should return the value after the increment/decrement. If the store does not support synchronous access it should throw an error.
+If no callback is provided, and the store supports synchronous access, the `incr` function should return the value after the increment. If the store does not support synchronous access it should throw an error.
 ```javascript
 incr(scope, key, amount) // return the value after the increment.
-decr(scope, key, amount) // return the value after the decrement.
 ```
 
 If callback argument is provided, it must be a function that takes two arguments:
@@ -73,21 +63,27 @@ incr(scope, key, amount, (error, value) => {
     // If an error occurred in process, pass the error object as first argument.
     // If the process was succeed, pass null as first argument and the incremented value as second argument.
 });
-decr(scope, key, amount, (error, value) => {
-    // If an error occurred in process, pass the error object as first argument.
-    // If the process was succeed, pass null as first argument and the decremented value as second argument.
-});
 ```
 
 if the value of the key or `amount` argument is not a number, throw an error.
 
-##### Uasge in a Function node
-<details>
+##### API of the Function Node
+
+Not only `incr` but also `decr` will be added to the API of Function node.  
+This makes it easy for the user to see what the code is doing.  
+Internally, `context.decr` calls `ContextStore.incr` and passes negated `amount`. (i.e. `-amount`)
+
+
+<details><summary>Uasge in the Function Node</summary>
 
 ```javascript
 global.incr("count");
 // Increase the value of `count` by 1 in `default` store.
 // And return the value after increment.
+
+global.decr("count");
+// Decrease the value of `count` by 1 in `default` store.
+// And return the value after decrement.
 
 global.incr("count", 5);
 // Increase the value of `count` by 5 in `default` store.
@@ -136,13 +132,7 @@ For example:
   [{"id":"cd1ed2c0.4f3e7","type":"change","z":"92e079a4.8d9f78","name":"Increment global.count","rules":[{"t":"set","p":"count","pt":"global","to":"$globalContext(\"count\") ? $globalContext(\"count\") + 1 : 1","tot":"jsonata"}],"action":"","property":"","from":"","to":"","reg":false,"x":420,"y":60,"wires":[[]]},{"id":"af7472b9.69e3f","type":"inject","z":"92e079a4.8d9f78","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":220,"y":60,"wires":[["cd1ed2c0.4f3e7"]]}]
   ```
 
-##### Discussion
-
-1. Is `decr` needed ?  
-   Some databases(e.g. MongoDB, Couchbase see [here](#Atomic%20API%20provided%20by%20NoSQL%20databases)) do not provide `decr` but can decrease the value using `incr` with negative number. Is `decr` needed  for Context API ? 
-
-
-### Next Phase
+### Next Steps
 
 * Add atomic API for Array  
   This is useful for representing queue and stack with array.  
