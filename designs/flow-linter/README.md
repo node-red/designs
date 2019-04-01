@@ -38,9 +38,27 @@ The flow linter provides a framework that automatically checks whether a flow is
 #### Command-line interface (batch-style)
 ![External CLI](external-cli.png)
 
-#### Integrated in Editor (in Sidebar, batch-style)
+#### Integrated in Editor
+Linter can be integrated in the Editor.
+We are considering following two pattern for user interface: batch and on-the-fly.
+
+After we have the core design of the linter settled, we
+will consider more detailed design work, such as
+how the linter will be exposed in the editor.
+
+##### Batch
+In batch style, an user pushes a button in linter sidebar
+to start linting.  This pattern requires processing power
+only when the user want to check the flows.  But the
+user explicitly push the button to check the flows.
 ![Sidebar](sidebar.png)
 
+##### On-the-fly
+In on-the-fly style, the Editor automatically checks
+the flows when user updates some part of flows.
+This pattern need no intervention of a user, but
+each update of a flow causes validation processes.
+![On the fly](on-the-fly.png)
 
 ### Architecture
 
@@ -52,6 +70,18 @@ Programmers need not to know about the format of flow.json and structure of flow
 
 #### pluggable rules
 Developer can create their own rules by writing plug-in module.
+
+Plug-in module includes single function `check`,
+and it takes following three arguments:
+- instance of FlowSet: complete flow set in the Editor or flow.json file which is designated by command line interface.
+- configuration object for linter:
+- context: any object to control rule validation process
+
+The function returns an array of results.  
+Each result object contains following information
+- rule: rule name
+- ids: array of node IDs which violate the rule.
+- result: description of a violated rule.
 
 Following code shows example of plug-in, that checks existance of name of function node.
 
@@ -65,7 +95,8 @@ function check (afs, conf, cxt) {
     var verified = funcs
         .filter(function(e) {return e.name === undefined || e.name === "";})// check existance of name
         .map(function(e) {
-            return {rule:"no-func-name", id:e.id, result:conf}; // generate result
+            return {rule:"no-func-name", ids: [e.id], result: "empty function name"};
+            // generate result
         });
 
     return verified;
