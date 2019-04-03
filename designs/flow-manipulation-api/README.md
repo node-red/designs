@@ -122,7 +122,7 @@ Based on [Design: Flow file format v2](https://github.com/node-red/node-red/wiki
 - static parseFlow(string or array)
   - create Flowset from flow.json string or parsed array
   - returns: FlowSet object
-- getAllNodesArray()
+- getNodes()
   - retrieve all nodes in this flowset as an Array.
   - returns: Array of Flow/Config/Subflow/Node object
 - getNode(nodeId)
@@ -161,7 +161,7 @@ Based on [Design: Flow file format v2](https://github.com/node-red/node-red/wiki
 ##### Flow Class
 - constructor(nodeid, name)
   - create empty flow.
-- getAllNodesArray()
+- getNodes()
   - retrieve all nodes in this flow as an Array.
   - returns: Array of Node object
 - addNode(node)
@@ -191,7 +191,7 @@ Based on [Design: Flow file format v2](https://github.com/node-red/node-red/wiki
 ##### Subflow Class
 - constructor(nodeid, name)
   - create empty subflow.
-- getAllNodesArray()
+- getNodes()
   - retrieve all nodes in this subflow as an Array
   - returns: Array of Node objects.
 - addNode(node)
