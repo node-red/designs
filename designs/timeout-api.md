@@ -24,46 +24,54 @@ It will be possible for the runtime to timeout a node that does not complete its
 processing of a message within a given time. But this can only work if the runtime
 knows a node has been updated to call `node.done`.
 
-By default, a Node cannot be timed out.
+**By default, a Node cannot be timed out**
 
 It will be up to individual implementations to decide if it makes sense to add
-timeout handling.
+timeout handling. Some nodes, such as the Change and Switch nodes do not perform
+any long-running activity, so would not make sense to enable timeout handling in
+them.
 
-If they do choose to support timeout logic, they will:
+To enable timeout handling a node must add an event handler for the `timeout` event:
 
-1. call `Node.setTimeout(secs)` in their constructor to set their timeout value.
-2. optionally add handler for the `timeout` event:
+    this.on('timeout', function(msg) {
+        // Process this timeout. For example, cancel any in-flight work
+    })
 
-        this.on('timeout', function(msg) {
-            // Process this timeout. For example, cancel any in-flight
-        })
+By adding this handler, the node is telling the runtime it can be timed out and,
+therefore, that the node *will* call `node.done(msg)` when it finishes with each
+message.
 
-If the node has set a timeout, then the runtime will track the messages passed
-to the node using `_msgid`. If `node.done()` is not called within the required
-timeout the runtime will call `Node.error(err,msg)` and trigger the timeout listener
-if one is registered. TODO: describe the precise details of the `err` passed in
-this case.
+The runtime will track the messages passed to the node using a `Set` - this
+removes the need to rely on any particular message property value (such as `_msgId`)
+that could be modified by the node.
+
+
+If `node.done()` is not called within the required timeout the runtime will call
+`Node.error(err,msg)` and trigger the timeout listener if one is registered.
 
 ### Next steps
 
 Some implementation considerations and outstanding questions:
 
- - `_msgid` might not be unique - for example a sequence of messages from a `Split`
-   node. That makes tracking messages in/out of a node tricky. Should the node
-   generate new `_msgid` values if it detects a duplication? That could break
-   message tracking in the metrics event layer.
+ - how should a Function node indicate it can be timed-out? It could be able to set
+   a timeout handler in the same was as described above - but that would be
+   evaluated with every single message the Function receives.
 
- - how should a Function node indicate it can be timed-out? Adding `node.setTimeout()`
-   to the top of the function code would mean it is called after a msg is received - too
-   late to start the timeout handling logic. It could be exposed as a config
-   option on the node, which leads to the next point....
+ - This api assumes a default timeout value is applied to all enabled nodes.
+    - Should it be possible for individual nodes to be given a custom timeout value?
+    - If so, how does the user provide that value? The Editor does not know if the
+      runtime instance has added a `timeout` handler
+      - add another flag in the node's HTML file?
+      - add the option in the UI regardless?
+    - An node-level api will be needed for the node to give its value to override
+      the default - `node.setTimeout(secs)`.
 
- - Should it be possible in the UI to set a timeout on any node? Or at least those
-   nodes that support a timeout? The question becomes how the editor knows a node
-   can be timed-out; the call to `setTimeout()` is in the runtime and only made
-   when a Node is being created. Does the node's HTML also need a flag adding
-   to say it can be timed out?
-
+ - The simple implementation of a timeout will be to add a `setTimeout` for every
+   message that is passed to the node - clearing the timeout when `done` is called.
+   That does, however, lead to a performance issue if we are creating and
+   clearing hundreds of timers a second. A more careful design would be to have
+   one `setTimeout` active per node that checks for the next thing to timeout.
+   This is probably the most critical part of the implementation to get right.
 
 ## History
 
