@@ -67,10 +67,28 @@ the `msg` passed to the function. If `statusObject` is provided, `msg.status` wi
 be set to its value. In any case, the `msg` will have `msg.status.complete` set
 to `true`.
 
+The Status event will _only_ be passed to the editor over comms if `statusObject`
+has been provided.
+
 This function should be the last thing a node does after handling a message. It
 should only be called once per message received.
 
+```
+var node = this;
+this.on('input', function(msg) {
+    // do something with 'msg'
+    if (!err) {
+        node.send(msg);
+    } else {
+        node.error(err,msg);
+    }
+    node.done(msg);
+});
+```
+
+
 This will also be made available in the `Function` node.
+
 
 #### Timeout handling
 
@@ -85,6 +103,17 @@ The following designs were considered for this feature and are kept here for
 future reference.
 
 ### Alternative Option 0: Pass in scoped `send` and `done` functions
+
+This alternative would provide full correlation between calls to `send` and `done`
+with the original message. However it has two significant drawbacks that make it
+impractical:
+
+ - it is a significant api change that cannot be made backwards compatible. We
+   would be forcing nodes to drop support for Node-RED 0.x and will lead to
+   a bad user experience.
+ - there is overhead in creating the necessary closure for every single message -
+   both in terms of memory and through-put.
+
 
 <details>
 
