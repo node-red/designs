@@ -41,17 +41,81 @@ This simple system has a few limitations that we want to address:
  3. due to 1 & 2, we cannot build any timeout feature into the node
  4. we know of a use case where an embedder of node-red requires nodes to be strictly one-in, one-out, and that should be policed by the runtime. Putting aside the specifics, we cannot provide any such mode of operation with the current model
 
-> (HN): According to the discussion held on May 17th,
-> the correlation information among an input message and output messages are expected to be used for logging purpose, and
-> and a output message correlate with the latest input message received.
-
 This design note explores how this mechanism could be updated to satisfy these limitations.
 
-The original draft of this node set out three options. Through the process of writing the options, I've chosen my preferred approach. I have left the other two options at the bottom of the note for reference.
+> This design has changed a few times. Having settled on one approach, concerns
+> were raised that it was too much of a change from the existing API to be
+> practical to adopt. This latest design reflects on that and tries to find
+> a more modest approach that satisfies as much of the requirements as possible.
+
+The primary use case for this is for a user to be able to create a Flow that is
+notified when a message is successfully processed at a critical point of a flow.
+For example, the `Email Out` node has published its message.
+
+### `Node.done([statusObject], msg)`
+
+A new function is added to the `Node` object that can be used to indicate a node
+has finished processing a message.
+
+The function takes two arguments:
+
+ - `statusObject` - an _optional_ object used to update the Node's status.
+ - `msg` - the message being marked as complete.
+
+Calling this function will trigger any in-scope `Status` nodes. They will emit
+the `msg` passed to the function. If `statusObject` is provided, `msg.status` will
+be set to its value. In any case, the `msg` will have `msg.status.complete` set
+to `true`.
+
+The Status event will _only_ be passed to the editor over comms if `statusObject`
+has been provided.
+
+This function should be the last thing a node does after handling a message. It
+should only be called once per message received.
+
+```
+var node = this;
+this.on('input', function(msg) {
+    // do something with 'msg'
+    if (!err) {
+        node.send(msg);
+    } else {
+        node.error(err,msg);
+    }
+    node.done(msg);
+});
+```
+
+
+This will also be made available in the `Function` node.
+
+
+#### Timeout handling
+
+This is moving to a separate Design note and not part of the delivery of this
+design.
 
 ---
 
-### Pass in scoped `send` and `done` functions
+## Alternative Designs
+
+The following designs were considered for this feature and are kept here for
+future reference.
+
+### Alternative Option 0: Pass in scoped `send` and `done` functions
+
+This alternative would provide full correlation between calls to `send` and `done`
+with the original message. However it has two significant drawbacks that make it
+impractical:
+
+ - it is a significant api change that cannot be made backwards compatible. We
+   would be forcing nodes to drop support for Node-RED 0.x and will lead to
+   a bad user experience.
+ - there is overhead in creating the necessary closure for every single message -
+   both in terms of memory and through-put.
+
+
+<details>
 
 If the event handler is registered with three arguments, the runtime will pass in functions that should be used to send or mark the msg as handled.
 
@@ -110,7 +174,7 @@ The right approach will be to timeout the function. A timeout would be considere
 
 > (HN): Note: Because processing of `send` and `done` is on critical path of node processing, we must take care of reducing their execution overhead on implementation.
 
----
+</details>
 
 ### Alternative Option 1: Add a `node.complete` function - v1
 
@@ -174,4 +238,5 @@ The new style handler can be activated by calling `node.useNewStyleHandler()` or
 
 ## History
 
+  - 2019-03-26 - rewritten to cover new design proposal
   - 2019-02-27 - migrated from Design note wiki
