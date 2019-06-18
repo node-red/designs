@@ -31,7 +31,8 @@ with enough detail to review the intent and direction of the feature.
  - [Subflow Node Modules](designs/subflow-node-modules.md)
  - [Runnable Projects](designs/runnable-projects.md)
  - [Dynamic MQTT Node](designs/dynamic-mqtt-node.md)
- - [Exportable Subflow](designs/exportable-subflow)
+ - [Exportable Subflow](designs/exportable-subflow.md)
+ - [Node Timeout API](designs/timeout-api.md)
 
 #### In-progress
 
