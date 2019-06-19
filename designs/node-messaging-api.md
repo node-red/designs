@@ -52,26 +52,21 @@ The primary use case for this is for a user to be able to create a Flow that is
 notified when a message is successfully processed at a critical point of a flow.
 For example, the `Email Out` node has published its message.
 
-### `Node.done([statusObject], msg)`
+### `Node.done(msg,[error])`
 
 A new function is added to the `Node` object that can be used to indicate a node
 has finished processing a message.
 
-The function takes two arguments:
+The function takes up to two arguments:
 
- - `statusObject` - an _optional_ object used to update the Node's status.
  - `msg` - the message being marked as complete.
+ - `error` - an _optional_ error message
 
-Calling this function will trigger any in-scope `Status` nodes. They will emit
-the `msg` passed to the function. If `statusObject` is provided, `msg.status` will
-be set to its value. In any case, the `msg` will have `msg.status.complete` set
-to `true`.
+Calling this function with only the `msg` argument will trigger any in-scope `Complete`
+nodes. This is a new node type that will be added under this proposal.
 
-The Status event will _only_ be passed to the editor over comms if `statusObject`
-has been provided.
-
-This function should be the last thing a node does after handling a message. It
-should only be called once per message received.
+If the `error` argument is also provided, then any in-scope `Catch` nodes will
+be triggered instead of the `Complete` node.
 
 ```
 var node = this;
@@ -86,14 +81,49 @@ this.on('input', function(msg) {
 });
 ```
 
+```
+var node = this;
+this.on('input', function(msg) {
+    // do something with 'msg'
+    if (!err) {
+        node.send(msg);
+        node.done(msg);
+    } else {
+        node.done(msg, err);
+    }
+});
+```
+
 
 This will also be made available in the `Function` node.
 
+#### `Complete` node
+
+This design has changed quite a few times. It has bounced between adding a new
+node to handle the 'done' events, and reusing the `Status` node.
+
+Having modelled the `Status` node approach, a number of issues were identified that
+made it less ideal.
+
+ - Existing flows using Status nodes will suddenly start receiving the 'done' status
+   events. If the flows are not expecting them, that could have bad side-effects.
+ - A workaround to that would be to add an option to the Status node to opt into
+   receiving 'done' events. But that gets messy.
+ - Overloading the Status event with the Done event also gets messy when there is
+   also an error to report.
+
+Having a new node type to handle the 'done' events is the cleanest way for a flow
+author to create a flow that can react to the different types of event - status,
+error and done.
+
+This node will be very similar in design to the Catch/Status node.
 
 #### Timeout handling
 
 This is moving to a separate Design note and not part of the delivery of this
 design.
+
+[https://github.com/node-red/designs/blob/master/designs/timeout-api.md]()
 
 ---
 
@@ -238,5 +268,6 @@ The new style handler can be activated by calling `node.useNewStyleHandler()` or
 
 ## History
 
+  - 2019-06-19 - another iteration of the design
   - 2019-03-26 - rewritten to cover new design proposal
   - 2019-02-27 - migrated from Design note wiki
