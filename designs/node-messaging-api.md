@@ -116,7 +116,10 @@ Having a new node type to handle the 'done' events is the cleanest way for a flo
 author to create a flow that can react to the different types of event - status,
 error and done.
 
-This node will be very similar in design to the Catch/Status node.
+This node will be very similar in design to the Catch/Status node. However, it will
+*not* offer the default 'Handle all' type of behaviour the others do. The user
+*must* target it at specific nodes in the flow. They could chose to select all,
+but it would not be a top-level menu option as it is with the Catch/Status nodes.
 
 #### Timeout handling
 
