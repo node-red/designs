@@ -55,7 +55,7 @@ Following is a list of properties exported SUBFLOW node in SUBFLOW Module may co
 | 1    | flow    | array  | array of contained nodes in SUBFLOW |
 | 2    | sealed+ | bool   | SUBFLOW template is not editable   |
 | 3    | hidden+ | bool   | SUBFLOW template is hidden         |
-| 4    | name    | string | name of SUBFLOW module             |
+| 4    | moduleName | string | name of SUBFLOW module             |
 | 5    | color+  | string | color of SUBFLOW                   |
 | 6    | version | string | version of SUBFLOW (format: x.y.z) |
 | 7    | author+ | string | author of SUBFLOW                  |
