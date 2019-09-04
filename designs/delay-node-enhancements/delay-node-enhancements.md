@@ -16,50 +16,52 @@ state: draft
 To avoid the risk of message queue overflow, rate limit functionality in delay node will be useful but Node-RED users cannot customize queue handling.
 For example, the current delay node cannot simultaneously use the drop option and queue to process burst incoming messages.
 
-#### 2. Changing properties on demand
- Currently, the delay node supports msg.delay to change property value on demand.
-If the delay node additionally supports msg.rate to set rate value and msg.queueLength to change queue size, users can create custom delay node using subflow to wrap delay node.
-
-#### 3. Logging and error handling
+#### 2. Logging and error handling
  Because current drop option in rate limit mode doesn't record dropped messages, Node-RED users aren't aware of the lost messages.
 Therefore, it will be useful for Node-RED users to track background behaviors if the delay node outputs the number of dropped messages to the log stream.
 Additionally, Node-RED users can add their error handling in their flow if the delay node throws the dropped messages to the catch node when the queue reaches the defined limit.
 
+#### 3. Changing properties on demand
+ Currently, the delay node supports msg.delay to change property value on demand.
+If the delay node additionally supports msg.rate to set rate value and msg.queueLength to change queue size, users can create custom delay node using subflow to wrap delay node.
+
 ### Options in setting.js which the delay node uses
-- nodeMessageBufferMaxLength
+- nodeMessageBufferMaxLength *[Existing option]*
 
   The enhanced delay node supports nodeMessageBufferMaxLength as the default buffer length.
   The buffer length needs to be greater than queue length defined in msg.queueLength or node property UI.
 
-- customQueueLength (default: false)
+- enableCustomQueueLength (default: false) *[Newly added]*
 
-  When the customQueueLength value is true, the node property UI of the enhanced delay node shows customQueueLength as the text input.
+  When the enableCustomQueueLength value is true, the node property UI of the enhanced delay node shows enableCustomQueueLength as the text input.
   The default value is 0 because the current implementation doesn't use the queue.
  
   ![nodepropertyui.png](nodepropertyui.png)
 
-- throwDroppedMessages (default: false)
+- throwDroppedMessages (default: false) *[Newly added]*
 
-  Other nodes which support nodeMessageBufferMaxLength setting throws an empty message to the catch node when they reach the limit of the buffer length.
-  As the default, the behavior of enhanced delay node will be the same as existing other nodes.
-  If the throwDroppedMessages in setting.js is true, the enhanced delay node will throw dropped messages to the catch node. If the Node-RED supports this handling, Node-RED users are able to write their error handling in the flow.
+  If the throwDroppedMessages in setting.js is true, the enhanced delay node will throw dropped messages to the catch node.
+  After the Node-RED supports this handling, Node-RED users are able to write their error handling in the flow.
+  If the throwDroppedMessages in setting.js is false, the behavior of enhanced delay node will be the same as existing other nodes (Other nodes which support nodeMessageBufferMaxLength setting throws an empty message to the catch node when they reach the limit of the buffer length).
 
 ### Logging
 - The number of dropped messages
   - debug level: Node-RED outputs the node ID and the number of dropped messages to the log stream every 15 seconds.
-  - trace level: In addition to node ID and the number of dropped messages, Node-RED writes message ID of dropped messages to the log stream every 15 seconds.
+  - trace level: In addition to debug level information, Node-RED writes message ID of dropped messages to the log stream.
 - Queue usage rate
   - debug level: Node-RED outputs the node ID and the size of the message queue every 15 seconds.
 
 ### Properties to change a property on demand
-- msg.rate
+- msg.rate: property in message to change rate value *[Discussed]*
 
   The enhanced delay node overwrites the existing rate value defined in the node property UI when it receives the message which contains msg.rate value.
+  To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the rate using msg.rate.
 
-- msg.queueLength
+- msg.queueLength: property in message to change queue length *[Newly added]*
 
   The enhanced delay node overwrites queue length according to msg.queueLength value which received message has.
   If the number of messages in the queue is greater than the queue length in the msg.queueLength, the last messages will be deleted.
+  To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the queue length using msg.queueLength.
 
 ### Properties
  The enhanced delay node newly has queueLength as a node property.
