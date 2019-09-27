@@ -57,11 +57,11 @@ If the delay node additionally supports msg.rate to set rate value and msg.queue
   The enhanced delay node overwrites the existing rate value defined in the node property UI when it receives the message which contains msg.rate value.
   To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the rate using msg.rate.
 
-- msg.queueLength: property in message to change queue length *[Newly added]*
+- msg.nodeMessageBufferMaxLength: property in message to change buffer length *[Newly added]*
 
-  The enhanced delay node overwrites queue length according to msg.queueLength value which received message has.
-  If the number of messages in the queue is greater than the queue length in the msg.queueLength, the last messages will be deleted.
-  To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the queue length using msg.queueLength.
+  The enhanced delay node overwrites buffer length according to msg.nodeMessageBufferMaxLength value which received message has.
+  If the number of messages in the buffer is greater than the buffer length in the msg.nodeMessageBufferMaxLength, the last messages will be deleted.
+  To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the buffer length using msg.nodeMessageBufferMaxLength.
 
 ### Properties
  The enhanced delay node newly has queueLength as a node property.
