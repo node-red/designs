@@ -64,20 +64,30 @@ To mitigate this, we'll create configuration options for graceful shutdown
 so that user can select whether the runtime waits for graceful period or shutdown immediately.
 
 #### More sophisticated approach:
-Using [Node Messaging API](../node-messaging-api.md)
-and [Node Timeout API](../timeout-api.md),
-the runtime can detect existence of in-progress processing.
-For example, the runtime may track messages using `Set`, and when these set becomes empty,
-the runtime judges the all in-progress process are completed, and then start final shutdown processes.
 
-Design of further details are in progress, aligned with design of Messaging/Timeout APIs.
+Assuming that all implementations of node use [Node Messaging API](../node-messaging-api.md), we can use send() and done() callback
+for counting in-progress messages.
+
+- When `send()` is called, the runtime add a number of messages sent to an in-progress message counter.
+- If a node generates message(s) voluntarily (i.e. other than `node.on("input")` handler),
+    the node also increments the counter.
+- When `done()` is called, the runtime decrements the counter. 
+  - Note that the `done()` is called only from `input` event handler, not called in voluntary message generating process. 
+
+To shutdown gracefully:
+- Firstly, the runtime stops message generating nodes.
+- Then, the runtime waits for the counter to be zero, or for the graceful period to be expired.
+- After that, the runtime shutdown all the nodes.
+
+![In-progress message counter](./sequence.svg)
+
 
 ### User Experience and mock-up UI designs
 
 In configuration panel of each flow, flow developers configure
 which node should be closed at the initial phase of graceful shutdown.
 
-![Graceful Shutdown ](./graceful-select-node.png)
+![Graceful Shutdown](./graceful-select-node.png)
 
 And, in `settings.js`, flow developers or users can configure
 whether graceful shutdown is enabled, and a duration of the graceful period.
