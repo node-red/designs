@@ -53,17 +53,7 @@ prevent generating new process.
 After stopping nodes which generate new process, Node-RED should 
 determine whether all in-progress process is completed.
 
-#### Initial approach: 
-Runtime just waits constant amount of time as a 'graceful period', 
-and when the time is expired, it shutdowns remaining nodes.
-Drawback of this approach is necessity of waiting graceful period
-regardless of remaining in-progress processes.
-This also affect a response time for (re-)deploying flow, and 
-it is annoying for the users who don't need a graceful shutdown.
-To mitigate this, we'll create configuration options for graceful shutdown
-so that user can select whether the runtime waits for graceful period or shutdown immediately.
-
-#### More sophisticated approach:
+#### Current approach:
 
 Assuming that all implementations of node use [Node Messaging API](../node-messaging-api.md), we can use send() and done() callback
 for counting in-progress messages.
@@ -84,17 +74,33 @@ To shutdown gracefully:
 
 ### User Experience and mock-up UI designs
 
+#### Flow developers
+
 In configuration panel of each flow, flow developers configure
-which node should be closed at the initial phase of graceful shutdown.
+which node should be closed at the initial phase of graceful shutdown.  These node are called *process initiator nodes*.
 
 ![Graceful Shutdown](./graceful-select-node.png)
 
-And, in `settings.js`, flow developers or users can configure
-whether graceful shutdown is enabled, and a duration of the graceful period.
+#### Flow users
+
+Graceful shutdown function is disabled if you doesn't enable it explicitly on the `$HOME/settings.js`.
+
+To use Graceful shutdown function, users should add following settings to enable graceful shutdown, and a duration of the graceful period.
 ```
-  gracefulShutdown: boolean,
-  gracefulPeriod: number # milliseconds
+  gracefulShutdown: true,
+  gracefulPeriod: 10000 # milliseconds
 ```
+
+Current implementation depends on the use of Node Messaging API.
+If all of following conditions are true, the runtime can't detect in-progress processes:
+- graceful shutdown is enabled in `settings.js`.
+- one or more process initiator nodes are checked in configuration panel of each flow
+- the flow contains nodes which doesn't use Node Messaging API, the runtime 
+
+In this situation, users may experience following gliches:
+- The runtime wait a full graceful period, in spite of no in-progress processes.
+- The runtime prematurely shutdown, in spite of existing in-progress processes.
+
 
 ## Related Design Notes
 - [Node Messaging API](../node-messaging-api.md)
