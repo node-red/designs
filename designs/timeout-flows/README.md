@@ -70,7 +70,7 @@ A "join" node waits for multiple messages and combines them. Adding an option on
 Figure 6. Adding "once" option on "join" node
 
 #### Enhancements of "trigger" node:
-A "trigger" node pass a message to the next node, and wait for the defined time to send a message again. Adding options, which are "discrete outputs" and "memorize message ids", on the node, this node sends 2nd message to the other wired node, and memorise the message id in the flow context.
+A "trigger" node pass a message to the next node, and wait for the defined time to send a message again. Adding options, which are "discrete outputs" and "memorize message ids", on the node, this node sends 2nd message to the other wired node, and memorise the message id in the flow context. These options can be selected when "with for" is selected in the "then" property.
 
  ![join-node-option](images/properties-2.png)
 
