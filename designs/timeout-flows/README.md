@@ -105,7 +105,7 @@ Figure 11. Timeout flow
 
 In above case, the "trigger" node sends a message to the "procedure" node, and keeps its id in the flow context. The "procedure" node sends the message to the "join" node. The "join" node trees to find its id in the flow context. If the "join" node could find it, the message would be sent to the "check" node and the "join" node would delete the id in the flow context. After 250ms, the "trigger" node sends the same message to the "timeout" node, and the "timeout" node writes "payload=timeout" and sends it to the "join" node. the "join" node cannot find the message id because the id was already deleted. The message will be ignored.
 
-If a function in the "procedure" node takes time, the "join" node will accept a message from the "timeout" node. Then the "join" node find the same id in the flow context and send it to the "check" node. A the same time, the "join" node deletes the id in the flow context. The "check" node checks where the message comes from. After that the "check" node will be able to deal with a timeout error.
+If a function in the "procedure" node takes time, the "join" node will accept a message from the "timeout" node. Then the "join" node find the same id in the flow context and send it to the "check" node. In the same time, the "join" node deletes the id in the flow context. The "check" node checks where the message comes from. After that the "check" node will be able to deal with a timeout error.
 
 ## History:
  - 2019-09-19 - Initial proposal submitted
