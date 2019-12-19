@@ -36,7 +36,10 @@ The flow linter provides a framework that automatically checks whether a flow is
 ### User interface
 
 #### Command-line interface (batch-style)
-![External CLI](external-cli.png)
+
+Stand-alone command, which reads a flow.json file and generate a verification result to standard output
+(like a ordinal `lint` command).
+![External CLI](external-cli.svg)
 
 #### Integrated in Editor
 Linter can be integrated in the Editor.
@@ -62,7 +65,18 @@ each update of a flow causes validation processes.
 
 ### Architecture
 
-![Functional diagram](func-diagram.png)
+![Functional diagram](func-diagram.svg)
+
+Outline of main routine of flow linter:
+
+1. Read a configuration from a designated config file or `nrlint` in setting.js  
+2. Determine which rule plug-in should be loaded
+3. create FlowSet object from flow.json file or flow object in editor.
+4. Loading rule plug-in modules
+5. for all plug-ins, call check() function with FlowSet object, config, and context.
+   Each check() function is called in the order of appearance in configuration file.
+   Returned context from a rule plug-in are passed to argument of next rule plug-in.
+6. Consolidate results and a context, and display the result to console, side-bar, etc.
 
 #### Flow manipulation API
 The flow manipulation API provides a high-level interface to handle a flow.
@@ -76,10 +90,18 @@ is in editor, or a file on the filesystem.
 Flow Manipulation API is composed of following three categories.
 
 - Creation of FlowSet object: A FlowSet object is created from a flow.json file/string or flow objects which are managed in Flow Editor.
+  - `FlowSet.parseFlow()`
+  - `FlowSet.copyFlow()`
 
 - Manipulation of a flow via FlowSet object: All of manipulation functions can be used through a FlowSet object.
+  - `FlowSet.prototype.getAllNodesArray()`
+  - `FlowSet.prototype.get{Node/Flow/Config/Subflow}()`
+  - `FlowSet.prototype.{next/prev}()`
+  - `FlowSet.prototype.{downstream/upstream/connected}()`
+  - (update operations are under consideration)
 
-- Exporting a flow.json file or committing to editor: FlowSet object can be exported to a file, or merging into editor's flow information.
+- Exporting a FlowSet object: FlowSet object can be exported to a file, or merging into editor's flow information.  
+  - (under consideration)
 
 For linter, we are now focusing on improving read and search interfaces. 
 
@@ -94,9 +116,11 @@ and it takes following three arguments:
 
 The function returns an array of results and a (modified) context.
 Each result object contains following information
-- rule: rule name
-- ids: array of node IDs which violate the rule.
-- result: description of a violated rule.
+- result: array of verification results of this rule
+  - rule: (String) rule name
+  - ids: array of node IDs which violate the rule.
+  - info: (Any object) description of a violated rule.
+- context: updated context 
 
 Following code shows example of plug-in, that checks existence of name of function node.
 
@@ -110,11 +134,11 @@ function check (afs, conf, cxt) {
     var verified = funcs
         .filter(function(e) {return e.name === undefined || e.name === "";})// check existence of name
         .map(function(e) {
-            return {rule:"no-func-name", ids: [e.id], result: "empty function name"};
+            return {rule:"no-func-name", ids: [e.id], info: "empty function name"};
             // generate result
         });
 
-    return {result: verified, context: cxt};
+    return {result: verified, context: cxt}; // context is not modified, just pass through
 }
 
 module.exports = {
@@ -122,22 +146,10 @@ module.exports = {
 };
 ```
 
-Outline of main routine of flow linter:
-
-1. Read a configuration from a designated config file or `nrlint` in setting.js  
-2. Determine which rule plug-in should be loaded
-3. create FlowSet object from flow.json file or flow object in editor.
-4. Loading rule plug-in modules
-5. for all plug-ins, call check() function with FlowSet object, config, and context.
-   Each check() function is called in the order of appearance in configuration file.
-   Returned context from a rule plug-in are passed to argument of next rule plug-in.
-6. Consolidate results and a context, and display the result to console, side-bar, etc.
-
 #### Configuration
 Linter reads configuration files in following order:
 1. Project-specific configuration: $HOME/.node-red/project/projectname/nrlint.js
 2. Per-user configuration: $HOME/.node-red/settings.js
-
 3. Command-line argument: nrlint --config nrlint.js / node-red --lintconfig nrlint.js
 
 If there is a conflict between them, latter definition overrides former one.
@@ -176,10 +188,13 @@ module.exports = {
 ```
 
 #### Report format
-- should be similar format with other linting tools (e.g. ESlint, JShint, ...)
+- under consideration.
+  - should be similar format with other linting tools (e.g. ESlint, JShint, ...)
 
 #### Other Consideration
 - When validation is invoked in Editor, validation codes should be executed in editor.  API call to server-side is expensive, and it is need to add extra adminAPI in the core.
+  - However, managing two versions (for browser and for server) of validation codes is cumbersome process,
+    even if we can use some automatic generation mechanism.  Discussion about this is moved to Appendix.
 
 ### Implementation plan
 
@@ -192,7 +207,6 @@ module.exports = {
 - Rule configuration UI
 - Make rules be exported as JSON format and can be included in flow.json so that developers can distribute flow templates with their own restrictions.
 - On-the-fly checking in Editor
-![On the fly](on-the-fly.png)
 
 ### Related works
 - [Design: Flow Manipulation API](https://github.com/node-red/designs/tree/master/designs/flow-manipulation-api)
@@ -204,14 +218,15 @@ module.exports = {
     - Currently plug-in installer uses this to generate Editor-side code, but we should use only on plug-in development phase, and make plug-in user need not to depend the tool.
   - [Babel](https://babeljs.io/): convert modern JavaScript (ES2015+) code to (traditional) JavaScript code that can be executed on various browsers.
     - It is useful but it is very large project, so we should avoid to make dependency with it.
-  - [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) defines the protocol used between an editor and a language server that provides language features like lint.  It may be alternative option to implement lint function as a language server embedded in a Node-RED server.
+
+- [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) defines the protocol used between an editor and a language server that provides language features like lint.  It may be alternative option to implement lint function as a language server embedded in a Node-RED server.
     - Language Server Protocol itself is aimed for line-oriented text programming languages.  It is not suitable for visual programming language like Node-RED.  If we adopt the LSP, We might incorporate only their 'Client-Server' architecture, and not incorporate their protocol or data model.
     - If we adopt this architecture, the linter need not to generate code for server and browser.  But we have to estimate an overhead to send flow object from browser to server.
 
 The code generation mechanism is shown in below.
-![Generating Code](code-generation.png)
--->
+![Generating Code](code-generation.svg)
 
 ## History
 - 2018-12-21 - Initial proposal submitted on [Design note wiki](https://github.com/node-red/node-red/wiki/Design:-Flow-Linter)
 - 2019-03-06 - migrated from Design note wiki
+- 2019-12-19 - update document structure, and update description of plug-in and API.
