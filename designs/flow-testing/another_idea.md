@@ -30,9 +30,10 @@ state: draft
 - Node-RED automatically runs a test on Travis CI when the pull request was posted.
 
 ## Flow testing UI on each node property UI
- The flow testing UI on each node property UI will solve concerns 1, 2 and 3. To open the UI, there's a newly wrench button next to the node property button, node description button and node appearance button on the node property UI. Because each node has test UI inside the node itself, we can avoid spaghetti flows which consist of a lot of test-in/out nodes and wires. And obviously, users can easily understand the target node without pointing from other test-in/out nodes. Additionally, users can set the default messages in the UI when the node behaves mock node.
+ The flow testing UI on each node property UI will solve concerns 1, 2 and 3. To use the flow testing UI, there's a newly wrench button next to the node property button, node description button and node appearance button on the node property UI. Because each node has test UI inside the node itself, we can avoid spaghetti flows which consist of a lot of test-in/out nodes and wires. And obviously, users can easily understand the target node without pointing from other test-in/out nodes. Additionally, users can set the default messages in the UI when the node behaves mock node.
 
 ![witeboard](images/20200131whiteboard.png)
+The photo of the idea
 
  Flow testing UI has the following two `editableList` UI. The ideas are the same as `editableList` in test-in/out nodes.
 
@@ -71,6 +72,9 @@ state: draft
 - (3) Switch button on the test tab in the sidebar
 
 When (1) or (2) exists before starting Node-RED, Node-RED will run in the test mode. After starting Node-RED in the test mode, users can turn off/on the mode on the switch button (3).
+
+## Other concerns
+ - How to test dashboard nodes from flow testing? (it may be impossible)
 
 ## History
 - 2020-01-31 - Initial proposal

@@ -4,6 +4,10 @@ state: in-progress
 
 # Flow Testing
 
+_Currently, we are considering another idea for testing flow as we wrote the following document._
+
+Document: [another_idea.md](another_idea.md)
+
 ## Summary
 
 Node-RED project already provides the tools for testing:
