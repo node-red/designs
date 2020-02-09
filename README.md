@@ -33,6 +33,7 @@ with enough detail to review the intent and direction of the feature.
  - [Dynamic MQTT Node](designs/dynamic-mqtt-node.md)
  - [Exportable Subflow](designs/exportable-subflow/README.md)
  - [Node Timeout API](designs/timeout-api.md)
+ - [Function Node Lifecycle Model](designs/function-node-lifecycle/README.md)
 
 #### In-progress
 
