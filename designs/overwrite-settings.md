@@ -21,9 +21,9 @@ accessible to regular Function nodes.
 
 Add startup option to overwrite values in `settings.js`.
 
-`-D`*<propeety path>*`=`*<JSON-value>*
+`-D `*\<property path\>*`=`*\<JSON-value\>*
 
-`-D@`*<path-to-JSON-file>*
+`-D @`*\<path-to-JSON-file\>*
 
 First option type overwrites specified property in the `settings.js` by the specified JSON value.
 
@@ -31,11 +31,17 @@ Second option type overwrites properties in the `settings.js` by contents of the
 
 The `settings.js` file is not modified with these options.
 
+`--define` can be used instead of `-D`.
+
 ### Examples
 
 ```
 // enable project feature
--Deditor.theme.projects.enables=true
+-D editor.theme.projects.enables=true
+
+// set console log level to "debug"
+-D logging.console.level="debug"
+
 // enable context storage
 // [context-setting.json]
 // "contextStorage": {
@@ -43,7 +49,7 @@ The `settings.js` file is not modified with these options.
 //         "module": "localfilesystem"
 //     },
 // }
--D@context-setting.json
+-D @context-setting.json
 ```
 
 ### Restrictions
