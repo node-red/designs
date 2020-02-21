@@ -44,7 +44,7 @@ adminAuth: {
       // Do whatever work is needed to check token is valid
       if (valid) {
         // Resolve with the user object. It must contain
-        // properties 'username' and 'permissionsÅf
+        // properties 'username' and 'permissions'
         var user = { username: 'admin', permissions: '*' };
         resolve(user);
       } else {
@@ -55,7 +55,7 @@ adminAuth: {
   },
   // Change the value to be set to the argument 'token' to
   // the specified header name.
-  // If not specified, get from Autorization header.
+  // If not specified, get from Authorization header.
   tokenHeader: '<token header name>'
 }
 ```
