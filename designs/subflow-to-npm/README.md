@@ -15,7 +15,7 @@ Even if redistributing SUBFLOW in JSON format is possible, it is useful to conve
 - listing in flow library by crawling npm repository,
 - ...
 
-Therefore, this design note proposes a method of converting JSON-formatted SUBFLOWubflow nodes into NPM modules.
+Therefore, this design note proposes a method of converting JSON-formatted SUBFLOW nodes into NPM modules.
 
 ![subflow-to-npm](subflow-to-npm.png)
 
@@ -27,11 +27,11 @@ Therefore, this design note proposes a method of converting JSON-formatted SUBFL
 
 #### Node API for installing SUBFLOW node
 
-Current Node-RED API for installing nodes only accepts JavaScript/HTML description of nodes.  Introduce a new API that accepts and installs JSON format SUBFLOW representation.
+Current Node-RED API for installing nodes only accepts JavaScript/HTML description of nodes.  To cope with this, we introduce a new API that accepts and installs JSON format SUBFLOW representation.
 
 - `RED.nodes.registerSubflow(`*\<SUBFLOW definition\>*`)`
 
-  This API is called from the JavaScript file to be installed.
+  This API is called from the JavaScript file that correspond to installed node.
 
 #### SUBFLOW NPM Module
 
@@ -43,11 +43,11 @@ Command-line tool or editor support is provided that converts SUBFLOW JSON repre
 
 - *\<SUBFLOW\>*`.js`
 
-  emplate code that loads SUBFLOW.json and call registerSubflow API 
+  Template code that loads `SUBFLOW.json` and call `registerSubflow` API.
 
 - README.md
 
-  enerated from SUBFLOW matadata (description property)
+  Generated from SUBFLOW matadata (description property)
 
 - package.json
 
@@ -70,11 +70,11 @@ Command-line tool or editor support is provided that converts SUBFLOW JSON repre
   }
   ```
 
-  JavaScript module is listed in `node-red.subflows` property.  This distingish normal node module and SUBFLOW node module.
+  JavaScript module is listed in `node-red.subflows` property.  This distingishes normal node module and SUBFLOW node module.
 
-  The `dependencies` property contains list of depending modules.  This information is extracted from imported module list of function node.  This is covered by separate design note on extension of function node (https://github.com/node-red/designs/pull/22).
+  The `dependencies` property points to array of depending modules.  This information is extracted from imported module list of function nodes.  This is covered by separate design note on extension of function node (https://github.com/node-red/designs/pull/22).
 
-HTML file is not required by SUBFLOW NOM module because editor-side UI information is contained in JSON representation.
+HTML file is not required by SUBFLOW node module because editor-side UI information is contained in JSON representation.
 
 ![subflow-to-npm-process](subflow-to-npm-process.png)
 
