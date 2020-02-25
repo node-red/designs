@@ -24,14 +24,14 @@ This design note proposes a feature that enables the execution of the Admin API 
 - For the "strategy" scheme, this is not possible. Because the OAuth strategy requires interaction with the browser, the Admin API cannot be executed.
   
 ### Adding a customizable token-based authentication function
-Add a new option `tokens` and `tokenHedaer` to `adminAuth`.
+Add a new option `tokens` and `tokenHeader` to `adminAuth`.
 
 The `tokens` options is a user-defined function process that has a 'token' as an argument, and can verify the provided token.
 This function is called if the token is not recognized from Node-RED's internal token store.
 
 The token is obtained from the existing Authorization header.
-If you want to get the token from any custom header, use the `tokenHedaer` option.
-You can obtain a token from the specified header name instead of the authorization header by specifying the header name in `tokenHedaer` option.
+If you want to get the token from any custom header, use the `tokenHeader` option.
+You can obtain a token from the specified header name instead of the authorization header by specifying the header name in `tokenHeader` option.
 
 #### setting.js example:
 ```javascript
