@@ -34,6 +34,7 @@ with enough detail to review the intent and direction of the feature.
  - [Exportable Subflow](designs/exportable-subflow/README.md)
  - [Node Timeout API](designs/timeout-api.md)
  - [Overwrite Values in settings.js](designs/overwrite-settings.md)
+ - [Admin API Authentication](designs/admin-api-authentication.md)
 
 #### In-progress
 
