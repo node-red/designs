@@ -75,6 +75,7 @@ When (1) or (2) exists before starting Node-RED, Node-RED will run in the test m
 
 ## Other concerns
  - How to test dashboard nodes from flow testing? (it may be impossible)
+ - We will add how to run on the CLI. (arguments, example, etc)
 
 ## History
 - 2020-01-31 - Initial proposal
