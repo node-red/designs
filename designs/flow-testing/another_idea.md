@@ -73,6 +73,10 @@ The photo of the idea
 
 When (1) or (2) exists before starting Node-RED, Node-RED will run in the test mode. After starting Node-RED in the test mode, users can turn off/on the mode on the switch button (3).
 
+## CLI
+This flow testing needs to be run on the CLI for targeting to run automatically on Travis CI when receiving a pull request on GitHub.
+When running a command like `grunt test-flow`, Node-RED runs flow testing then outputs each result such as the existing Mocha tests.
+
 ## Other concerns
  - How to test dashboard nodes from flow testing? (it may be impossible)
  - We will add how to run on the CLI. (arguments, example, etc)
