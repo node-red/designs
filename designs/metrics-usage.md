@@ -12,6 +12,7 @@ Metrics logs are useful for gathering and estimating execution statistics of Nod
 ## Authors
 
  - @HiroyasuNishiyama
+ - @k-toumura
 
 ## Details
 
@@ -94,4 +95,5 @@ Example metric logs:
 ## History
 
  - 2020-02-09 - initial note
+ - 2020-03-25 - add metric log usage for done/receiveEnd/asyncStart/asyncEnd
 
