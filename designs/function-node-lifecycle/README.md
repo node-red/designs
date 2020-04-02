@@ -61,6 +61,18 @@ Add new tabs (`Initialize`/`Finalize` [tab names must be reconsidered]) for spec
 
 Button for expanding code editor should be moved to bottom of settings panel in order to make editing area larger.
 
+#### Available APIs for initialization/finalization code
+
+The `node` variable can not be accessed from initialization/finalization code.  Therefore, it is not possible to use APIs depending on `node` such as `node.send`.  Contex APIs for `flow` or `global` context can also be used.
+
+#### Asynchronous processing
+
+If the initialization code needs to start an asynchronous work that needs to be resolved before the start of the function body, it is possible to save the promise in context and continue the process using it in the function body.
+
+#### Error handling 
+
+Exceptions to the initialization code are logged to console. If error handling is necessary, it should be handled in the initialization/termination code appropriately.
+
 ### Library Enhancements
 
 Export format of function node to Node-RED library currently uses comments to encode properties.  This must be extended to be able to include initialization/finilization code and required npm modules information.
@@ -68,3 +80,4 @@ Export format of function node to Node-RED library currently uses comments to en
 ## History
 
   - 2020-02-09 - Initial Note
+  - 2020-04-02 - Update API access and error handling in init/final code
