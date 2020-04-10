@@ -67,7 +67,7 @@ The `node` variable can not be accessed from initialization/finalization code.  
 
 #### Asynchronous processing
 
-If the initialization code needs to start an asynchronous work that needs to be resolved before the start of the function body, it is possible to save the promise in context and continue the process using it in the function body.
+If the initialization code needs to start an asynchronous work that needs to be resolved before the start of the function body, it is possible to return the promise from initialization code.  Initialization code is wrapped by async function, thus can use `await` withing the code.
 
 #### Error handling 
 
@@ -81,3 +81,4 @@ Export format of function node to Node-RED library currently uses comments to en
 
   - 2020-02-09 - Initial Note
   - 2020-04-02 - Update API access and error handling in init/final code
+  - 2020-04-10 - Update async processing in initialization code
