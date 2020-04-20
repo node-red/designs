@@ -53,49 +53,6 @@ Function node declares its required NPM module list to runtime by using new API.
 
 Because current Node-RED implementation starts flow execution before message handler callback is ready, we may need to modify runtime execution model in order to make function nodes wait for receiving messages before required NPM modules become ready to use.
 
-#### Additional settings for external npm module in `settings.js`
-
-Add a top-level property named `externalModule` to `settings.js`.  It points to a object with following properties.
-
-| name | type   | description  |
-| :--- | :----- | :----------- |
-| mode | string | one of `"auto"`, `"auto-update"`, `"manual"`, or `"none"` (default: `"manual"`)<br/>- `auto`: automatically install requested NPM module if not installed.<br/>- `auto-update`: same as `auto` but with automatic update if newer version is available.<br/>- `manual`: users can manually install requested NPM module from user settings panel.<br/>- `none`: installation of external NPM modules is not allowd |
-| whiteList | array of string | List of regular expressions that matches module's NPM registry specification. External libraries that matches this list **can** be used in `Function` nodes. |
-| blackList | array of string | List of regular expressions that matches module's NPM registry specification. External libraries that matches this list **can not** be used in `Function` nodes. |
-
-`whiteList` precedes over `blackList`.
-
-```
-    // Example of settings.js
-    externalModules: {
-        mode: "manual",
-        whiteList: [
-            "^fs-ext$",       // allow fs-ext
-            "^qrcode@1.4.4$"  // allow qrcode version 1.4.4
-        ],
-        blackList: [
-            ".*"              // disallow others 
-        ]
-    },
-```
-
-#### New API for requesting NPM module
-
-- `RED.nodes.registerRequiredModules`(*module*)
-
-Requests Node-RED runtime to install NPM module *module*.  Returns a promise that resolves to required module object or `undefined` if installation failed.  NPM module installation is performed according to specification in `settiongs.js` described above.
-
-If `auto` mode is specified, execution of a function node that require a NPM module waits for completion of its installation.
-
-#### Manual installation of NPM module
-
-User Settings panel will be extended to have `Modules` tab.
-It lists up NPM modules requested by `registerRequiredModules`.  
-Entry for already installed NPM module has `check update` button and `uninstall` button. Entry for not installed NPM module has `install` button. 
-
-![modules-tab](./modules-tab.png)
-
-
 ### Initialization and Finalization
 
 Add new tabs (`Initialize`/`Finalize` [tab names must be reconsidered]) for specifying code for common initialization or shouttown code.  Code executed for each received messages (same as code in current Function node) can be specified in `Function` tab.  This `Function` tab is selected by default.
@@ -128,4 +85,3 @@ Export format of function node to Node-RED library currently uses comments to en
   - 2020-04-02 - Update API access and error handling in init/final code
   - 2020-04-10 - Update async processing in initialization code
   - 2020-04-16 - Update message handling received while async initialization
-  - 2020-04-20 - Update NPM installation details
