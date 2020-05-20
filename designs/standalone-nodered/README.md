@@ -46,6 +46,8 @@ The standalone Node-RED is a desktop version of Node-RED which includes Node-RED
 
 ### Runtime
   The Node-RED runtime will be executed when the standard Node-RED starts.
+  Not to execute the flow until clicking the deploy button (same behavior as run button other IDEs), it runs in the `--safe` mode as default.
+  In case of executing the flow immediately in the start-up process, `--normal` mode should be set as an option to disable `--safe` mode.
 
   - Admin API
 
@@ -55,13 +57,15 @@ The standalone Node-RED is a desktop version of Node-RED which includes Node-RED
 
   - settings.js file
 
-    The standalone Node-RED has the default `settings.js` file. When there is no `settings.js` file under `~/.node-red/` directory, the standalone Node-RED saves the default `settings.js` file to load the custom settings in the following table.
+    Instead of default `~./node-red/` directory, the standalone Node-RED uses `~./node-red-standalone/` directory to avoid changing the current environment under `~/.node-red/` directory. 
+    The standalone Node-RED has the default `settings.js` file. When there is no `settings.js` file under `~/.node-red-standalone/` directory, the standalone Node-RED saves the default `settings.js` file to load the custom settings in the following table.
 
     | key                          | value |
     | ---------------------------- | ----- |
     | editorTheme.projects.enabled | true  |
 
-    If `~./node-red/` directory already has `settings.js` file which was created by common Node-RED, the standalone Node-RED uses it without overwriting the file to avoid changing the current environment.
+    The git command is a prerequisite if users want to use the project feature.
+    Node-RED automatically detects git command and enables the feature if it is installed.
 
 ### Logging
   Users can see log data in real-time on the event log window. On the other hand, users can also see historical log data from log files.
@@ -69,7 +73,7 @@ The standalone Node-RED is a desktop version of Node-RED which includes Node-RED
 
   - Windows: C:\Users\\< User name >\AppData\Roaming\node-red\logs\file.log
   - macOS: ~/Library/Logs/node-red/file.log
-  - Linux: ~/.config/node-red/logs/file.log
+  - Linux: /var/log/node-red.log
 
 ### Building binaries
   `npm run build` command builds binaries for the following OS environments.
@@ -77,6 +81,8 @@ The standalone Node-RED is a desktop version of Node-RED which includes Node-RED
   - Windows (msi)
   - macOS (dmg)
   - Linux (tar.gz)
+
+  The procedures about how to build other binaries like deb and rpm will be available in the documentation.
 
 ## History
 
