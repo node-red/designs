@@ -34,7 +34,6 @@ with enough detail to review the intent and direction of the feature.
  - [Exportable Subflow](designs/exportable-subflow/README.md)
  - [Node Timeout API](designs/timeout-api.md)
  - [Overwrite Values in settings.js](designs/overwrite-settings.md)
- - [Admin API Authentication](designs/admin-api-authentication.md)
 
 #### In-progress
 
@@ -43,9 +42,8 @@ for designs that are actively being worked on beyond the high-level detail.
 
  - [Subflow Property UI](designs/subflow-property-ui)
  - [Dashboard Layout Tool](designs/dashboard-layout-tool)
- - [Environment Variables](designs/env-vars)
  - [Flow Manipulation API](designs/flow-manipulation-api)
- - [Node Messaging API](designs/node-messaging-api.md)
+ - [Function Node Lifecycle Model](designs/function-node-lifecycle/README.md)
 
 #### Complete
 
@@ -53,4 +51,6 @@ Once a design has been implemented it should be updated to the `complete` state.
 The design should be updated to include references to where it has been implemented -
 such as the release it is included in.
 
- - *none*
+ - [Node Messaging API](designs/node-messaging-api.md)
+ - [Environment Variables](designs/env-vars)
+ - [Admin API Authentication](designs/admin-api-authentication.md)
