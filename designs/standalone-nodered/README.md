@@ -29,6 +29,37 @@ The standalone Node-RED is a desktop version of Node-RED which includes Node-RED
     Therefore, users may want to switch multiple projects for various environments on their single computer.
     Additionally, they need git functionality as default to proceed with team development or backup their flows.
 
+##  Scope
+
+### Installer
+- Installer setups Node-RED application to a user environment.
+- Easy update using installer including nodes.
+
+<img src='installer.png' width='400'>
+
+Fig.1 Installer
+
+### IDE
+- The following behaviors are the same as the normal Node-RED.
+   - Flow deployment to local runtime
+   - Flow import and export via clipboard or file upload/download
+   - Project features
+- JSON file association
+   - The standalone Node-RED opens the flow file using the JSON file association.
+   - The standalone Node-RED saves the flow to the opened file when deploying it or exiting the application.
+
+<img src='ide.png' width='600'>
+
+Fig.2 The scope of IDE (Red means the standalone specific)
+
+### Logging
+- Flow developers can check the log on the event log window.
+- For investigating error log by other users, the standalone Node-RED outputs the logs to files withe log rotate style.
+
+<img src='logging.png' width='300'>
+
+Fig.3 Logging
+
 ## Details
 
 ### Flow editor window
