@@ -5,7 +5,7 @@ state: draft
 # Flow Linter
 
 ## Summary
-Node-RED makes it easy to program by wiring nodes together.  But sometimes, because of its less restrictive nature, programmer may write flows that are hard to understand.  For example: 
+Node-RED makes it easy to program by wiring nodes.  But sometimes, because of its less restrictive nature, programmer may write flows that are hard to understand.  For example: 
 - Function node that has no name or description.  The reader need to read internal JavaScript code to understand what the node do,
 - Excessive amount of nodes in a single flow.
 
@@ -43,6 +43,7 @@ Stand-alone command, which reads a flow.json file and generate a verification re
 
 #### Integrated in Editor
 Linter can be integrated in the Editor.
+
 We are considering following two pattern for user interface: batch and on-the-fly.
 
 After we have the core design of the linter settled, we
@@ -69,14 +70,40 @@ each update of a flow causes validation processes.
 
 Outline of main routine of flow linter:
 
-1. Read a configuration from a designated config file or `nrlint` in setting.js  
-2. Determine which rule plug-in should be loaded
-3. create FlowSet object from flow.json file or flow object in editor.
-4. Loading rule plug-in modules
-5. for all plug-ins, call check() function with FlowSet object, config, and context.
+1. Read a configuration from a designated config file or `nrlint` property in setting.js  
+2. Determine which rule plug-in should be loaded based on the configuration.
+3. create an internal representation (FlowSet object) from flow.json file or flow object in editor.
+4. Loading rule plug-in modules.
+5. for all plug-ins, call check() function with FlowSet object, configuration, and context.
    Each check() function is called in the order of appearance in configuration file.
    Returned context from a rule plug-in are passed to argument of next rule plug-in.
 6. Consolidate results and a context, and display the result to console, side-bar, etc.
+
+#### Rule module
+We use a npm module mechanism to extend validation rules.
+
+- The 'core' plug-in module implements rules which are commonly used in any users.
+- The optional plug-in modules implement rules which are not commonly used or complex rules which require larger memory/computational footprints.
+
+To implement a rule npm module for both of CLI and editor, developer can use a code
+generation mechanism based on Webpack. 
+![Generating Code](code-generation.svg)
+
+Rule developer writes their own rule in single JavaScript file, and put it on
+rule plug-in framework (which will be provided in flow linter project repository).
+These files composes an npm package, and it can distributed among users.
+When an user installs the package, an installation script generates
+an HTML file which contains a converted JavaScript code and UI elements for Editor.
+
+If the user installs the package globally (i.e. with `-g` option), the original
+rule code is used for CLI linter command.  If the user install the package into 
+Node-RED's user directory (`~/.node-red` or another directory which is designated by
+`-u` option of node-red command),  Node-RED runtime automatically loads the
+package as a Node-RED node module, and generated code in HTML file is invoked in Editor.
+
+Currently, our prototype code uses a plug-in mechanism for Node-RED nodes.
+This mechanism is somewhat tricky and hacky, so we are planning to design a more generic
+plug-in mechanism of Node-RED. 
 
 #### Flow manipulation API
 The flow manipulation API provides a high-level interface to handle a flow.
@@ -98,6 +125,7 @@ Flow Manipulation API is composed of following three categories.
   - `FlowSet.prototype.get{Node/Flow/Config/Subflow}()`
   - `FlowSet.prototype.{next/prev}()`
   - `FlowSet.prototype.{downstream/upstream/connected}()`
+  - `FlowSet.prototype.{insert/remove}()`
   - (update operations are under consideration)
 
 - Exporting a FlowSet object: FlowSet object can be exported to a file, or merging into editor's flow information.  
@@ -117,9 +145,11 @@ and it takes following three arguments:
 The function returns an array of results and a (modified) context.
 Each result object contains following information
 - result: array of verification results of this rule
-  - rule: (String) rule name
+  - rule: (String) rule plugin name.
   - ids: array of node IDs which violate the rule.
-  - info: (Any object) description of a violated rule.
+  - name: (String) rule name.
+  - severity: "error" or "warn"
+  - message: (String) description of a violated rule.
 - context: updated context 
 
 Following code shows example of plug-in, that checks existence of name of function node.
@@ -134,7 +164,8 @@ function check (afs, conf, cxt) {
     var verified = funcs
         .filter(function(e) {return e.name === undefined || e.name === "";})// check existence of name
         .map(function(e) {
-            return {rule:"no-func-name", ids: [e.id], info: "empty function name"};
+            return {rule:"no-func-name", ids: [e.id], severity: "warn",
+              name: "no-func-name", message: "function node has no name"};
             // generate result
         });
 
@@ -161,11 +192,16 @@ If there is a conflict between them, latter definition overrides former one.
         "rules": [
             {
                 "name": "no-func-name",
-                "options": { "mode": "warn" }
+                "mode": "warn"
             },
             {
                 "name": "func-style-eslint",
-                "options": { "semi": 2 },
+                "parserOptions": {
+                  "ecmaVersion": 6
+                },
+                "rules": {
+                  "semi": 2
+                }
             },
             {
                 "name": "http-in-resp",
@@ -180,7 +216,7 @@ module.exports = {
     "rules": [
         {
                 "name": "no-func-name",
-                "options": { "mode": "warn" }
+                "mode": "warn"
         },
         // ...
     ]
@@ -199,14 +235,23 @@ module.exports = {
 ### Implementation plan
 
 #### First step
-- Implement a mock-up prototype of plug-in architecture
 - Implement CLI version
+  - stabilize APIs for flow manipulation.
+
+#### Second step
+- Implement Editor-integrated version (rule validation in Server, batch style)
+  - Implement a mock-up prototype of plug-in architecture
+  - Add UI element for linter side-bar.
+  - To check, push a button on the side-bar.  Results is also displayed in it.
+    - Internally, this calls a server-side private API endpoint for linter (`POST /linter`),
+      and the endpoint calls CLI version of linter, then linter returns
+      result in a JSON format. 
 
 #### Next steps
-- Implement Editor-integrated version (in Sidebar, batch-style)
-- Rule configuration UI
-- Make rules be exported as JSON format and can be included in flow.json so that developers can distribute flow templates with their own restrictions.
-- On-the-fly checking in Editor
+- Implement Editor-integrated version (rule validation in Editor, on-the-fly) 
+  - rule codes in Editor are generated automatically, or are written by hand.
+  - Rule configuration UI
+  - Make rules be exported as JSON format and can be included in flow.json so that developers can distribute flow templates with their own restrictions.
 
 ### Related works
 - [Design: Flow Manipulation API](https://github.com/node-red/designs/tree/master/designs/flow-manipulation-api)
@@ -223,10 +268,12 @@ module.exports = {
     - Language Server Protocol itself is aimed for line-oriented text programming languages.  It is not suitable for visual programming language like Node-RED.  If we adopt the LSP, We might incorporate only their 'Client-Server' architecture, and not incorporate their protocol or data model.
     - If we adopt this architecture, the linter need not to generate code for server and browser.  But we have to estimate an overhead to send flow object from browser to server.
 
-The code generation mechanism is shown in below.
-![Generating Code](code-generation.svg)
+
 
 ## History
 - 2018-12-21 - Initial proposal submitted on [Design note wiki](https://github.com/node-red/node-red/wiki/Design:-Flow-Linter)
 - 2019-03-06 - migrated from Design note wiki
 - 2019-12-19 - update document structure, and update description of plug-in and API.
+- 2020-04-27 - Plug-in mechanism
+- 2020-06-01 - Update implementation plan
+
