@@ -29,14 +29,15 @@ In traditional programming there are many test frameworks and the functionality 
 
 This design should deliver the following features/functionality:
 
-- The testing function should be able to be run from within the Node-RED editor or from a command line, so testing can be run as an automated delivery pipeline
+- The testing function should be able to be run from within the Node-RED editor or from a command line, so Node-RED application testing can be run as part of an automated delivery pipeline
 - The tests should be created using low-code methods, similar to how applications are created using Node-RED.  Ideally creating test cases should not be a coding activity
 - There should be the ability to create a "test suite", containing multiple test scenarios rather than a single test
 - Test definitions/implementation should not alter a flow in any way that will impact the functionality or performance during normal running
+- Test artifacts and configuration should be able to be easily identified and removed from a flow when deploying to a resource constrained device, without impacting the flow.
 
 ### Areas for debate/resolution
 
-- Should the testing of a function node have more advanced features, such as testing doubles (stubs and mocks)?
+- Should the testing of a function node have more advanced features, such as testing doubles (stubs and mocks) within the JavaScript code within the node?
 - How should sub-flow testing be performed?  As node/flow tests in the sub-flow editor or as a node within a main flow?
 - How should input node timed/repeat configuration work during test - disabled and let the test explicitly drive all testing or let input node drive testing?
 
@@ -45,7 +46,7 @@ This design should deliver the following features/functionality:
 A single node should be able to be tested in isolation.  Certain nodes, such as the function node or the change node, can contain significant amounts of functionality which may need testing in isolation (similar to unit tests in a traditional programming environment).
 
 - The test specification should permit some setup to occur before testing starts, such as setting environment variable or initialising context objects
-- tests should run by sending a specified object to the node under test then requiring a set of 'assertions' to be met:
+- tests should run by sending a specified msg object to the node under test then requiring a set of 'assertions' to be met, such as:
   - output exactly matched object(s) defined in the test definition
   - output contained or did not contain a property(s) or property value(s)
   - same as previous 2 bullets, but node generated specified output on a specific output connector (multiple output connections on node)
@@ -54,9 +55,9 @@ A single node should be able to be tested in isolation.  Certain nodes, such as 
 
 ### Flow testing
 
-Rather then testing a single node the flow test will test a flow as a whole.  Here an input node in the flow will be selected as the starting node for the test and an object will be specified to originate from the starting node.  This will allow the flow to be tested end to end.
+Rather then testing a single node the flow test will test a flow as a whole.  Here an input node in the flow will be selected as the starting node for a test and a msg object will be specified to originate from the starting node.  This will allow the flow to be tested end to end.
 
-- The test specification should permit some setup to occur before testing starts, such as setting environment variable or initialising context objects
+- The test specification should permit some setup to occur before testing starts, such as setting environment variables or initialising context objects
 - The test defines the starting node and the message the starting node will output
 - The test can override the configuration properties of any node in the flow for the duration of the test
 - The test can specify the same assertions available to the single node test (input message is exactly *{...}* or input message contains property *x* and property *x* has value *y*, ...) for any nodes in the flow, and optionally specify if the node should be run or not. (E.g. a database write node should not actually write to a database, but the test should verify the data arriving at the node would result in the correct database record being created)
