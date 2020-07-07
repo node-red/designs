@@ -30,7 +30,7 @@ The flow linter provides a framework that automatically checks whether a flow is
 ### Requirements / ideas
 - There are various rules/conventions, and each organization/community/etc. has different policies on it.  Because of this, the rules has to be pluggable and customizable.
 - Linter is used in both batch-style (e.g. command-line interface) and on-the-fly-style (e.g. integrated in Editor).  The core service of linter can be used in both usages.
-- Rule configuration can be exported as JSON format and can be included in flow.json so that developers can distribute flow templates with their own restrictions.
+- Rule configuration can be exported as JSON format and can be included in or packaged with `flows.json` so that developers can distribute flow templates with their own restrictions.
 - Use compatible format with other linter/tester tools for result output.
 
 ### User interface
@@ -44,9 +44,7 @@ Stand-alone command, which reads a flow.json file and generate a verification re
 #### Integrated in Editor
 Linter can be integrated in the Editor.
 
-We are considering following two pattern for user interface: batch and on-the-fly.
-
-After we have the core design of the linter settled, we
+We are considering following two pattern for user interface: batch and on-the-fly.  After we have the core design of the linter settled, we
 will consider more detailed design work, such as
 how the linter will be exposed in the editor.
 
@@ -84,26 +82,6 @@ We use a npm module mechanism to extend validation rules.
 
 - The 'core' plug-in module implements rules which are commonly used in any users.
 - The optional plug-in modules implement rules which are not commonly used or complex rules which require larger memory/computational footprints.
-
-To implement a rule npm module for both of CLI and editor, developer can use a code
-generation mechanism based on Webpack. 
-![Generating Code](code-generation.svg)
-
-Rule developer writes their own rule in single JavaScript file, and put it on
-rule plug-in framework (which will be provided in flow linter project repository).
-These files composes an npm package, and it can distributed among users.
-When an user installs the package, an installation script generates
-an HTML file which contains a converted JavaScript code and UI elements for Editor.
-
-If the user installs the package globally (i.e. with `-g` option), the original
-rule code is used for CLI linter command.  If the user install the package into 
-Node-RED's user directory (`~/.node-red` or another directory which is designated by
-`-u` option of node-red command),  Node-RED runtime automatically loads the
-package as a Node-RED node module, and generated code in HTML file is invoked in Editor.
-
-Currently, our prototype code uses a plug-in mechanism for Node-RED nodes.
-This mechanism is somewhat tricky and hacky, so we are planning to design a more generic
-plug-in mechanism of Node-RED. 
 
 #### Flow manipulation API
 The flow manipulation API provides a high-level interface to handle a flow.
@@ -179,13 +157,16 @@ module.exports = {
 
 #### Configuration
 Linter reads configuration files in following order:
-1. Project-specific configuration: $HOME/.node-red/project/projectname/nrlint.js
-2. Per-user configuration: $HOME/.node-red/settings.js
-3. Command-line argument: nrlint --config nrlint.js / node-red --lintconfig nrlint.js
 
-If there is a conflict between them, latter definition overrides former one.
+CLI version:
+1. File designated in command-line argument: `nrlint --config nrlintrc.js`
+2. Per-user configuration: `$HOME/.nrlintrc.js`
 
-- File format: in settings.js
+Editor-integrated version:
+1. Project-specific configuration: `$HOME/.node-red/project/projectname/nrlintrc.js`
+2. Per-user configuration: `$HOME/.node-red/settings.js`
+
+- in settings.js
 ```json
     ...
     "nrlint": {
@@ -210,7 +191,7 @@ If there is a conflict between them, latter definition overrides former one.
     },
     ...
 ```
-- in separate nrlint.js file
+- in separate nrlintrc.js file
 ```javascript
 module.exports = {
     "rules": [
@@ -223,20 +204,53 @@ module.exports = {
 }
 ```
 
-#### Report format
-- under consideration.
-  - should be similar format with other linting tools (e.g. ESlint, JShint, ...)
+#### Command line options
+```
+Lint tool for Node-RED flow
+Usage: nrlint [-h] [-c configfile] filename
 
-#### Other Consideration
-- When validation is invoked in Editor, validation codes should be executed in editor.  API call to server-side is expensive, and it is need to add extra adminAPI in the core.
-  - However, managing two versions (for browser and for server) of validation codes is cumbersome process,
-    even if we can use some automatic generation mechanism.  Discussion about this is moved to Appendix.
+Options:
+  -h, --help            show this help
+  -c, --config   FILE   use specified configuration
+                        otherwise, the command uses ~/.nrlintrc.js
+```
+
+#### Report format
+
+```
+% nrlint /path/to/flows.json
+parsing /path/to/flows.json...
+  49e0eb77.01e8a4	warn	'too large flow size'	flowsize
+  4579ab75.fb1b24	warn	'function node has no name'	no-func-name
+  288e10.1e7061f	warn	'function node has no name'	no-func-name
+  4c107e00.c2394	warn	'function node has no name'	no-func-name
+  9063e883.ecebe8	warn	'dangling http-in node'	dangling-http-in
+  c493f498.3df928	warn	'dangling http-response node'	dangling-http-resp
+  6841634.807f99c...	warn	'possible infinite loop detected'	loop
+  4579ab75.fb1b24	warn	'Missing semicolon.'	func-style-eslint
+  288e10.1e7061f	warn	'Missing semicolon.'	func-style-eslint
+  288e10.1e7061f	warn	'Missing semicolon.'	func-style-eslint
+  e5cba426.b81768	warn	'Missing semicolon.'	func-style-eslint
+  7b2eb3e0.dd37cc	warn	'Missing semicolon.'	func-style-eslint
+✖ 12 problems (0 errors, 12 warnings)
+```
+- First column: Node ID(s)
+- Second column: severity (error, warn)
+- Third column: description of the error/warning
+- Fourth column: a name of rule
+
+Concerns:
+- Difficult to find a correspondent node by node ID.
+  - For current workaround, use Node-RED editor's search window.  
+
+
 
 ### Implementation plan
 
 #### First step
 - Implement CLI version
   - stabilize APIs for flow manipulation.
+  - collect validation use cases, and implement rule set for them.
 
 #### Second step
 - Implement Editor-integrated version (rule validation in Server, batch style)
@@ -247,7 +261,7 @@ module.exports = {
       and the endpoint calls CLI version of linter, then linter returns
       result in a JSON format. 
 
-#### Next steps
+#### Third steps
 - Implement Editor-integrated version (rule validation in Editor, on-the-fly) 
   - rule codes in Editor are generated automatically, or are written by hand.
   - Rule configuration UI
@@ -256,7 +270,40 @@ module.exports = {
 ### Related works
 - [Design: Flow Manipulation API](https://github.com/node-red/designs/tree/master/designs/flow-manipulation-api)
 
-## Appendix: Automatic generation of browser-side code from server-side code
+## Appendix: Editor plug-in mechanism
+
+
+
+### Loader
+
+In order to load a linter function and rules to the editor, the editor need to employ a plug-in mechanism.
+
+#### Utilize a node loading mechanism
+
+To implement a rule npm module for both of CLI and editor, developer can use a code
+generation mechanism based on Webpack. 
+![Generating Code](code-generation.svg)
+
+Rule developer writes their own rule in single JavaScript file, and put it on
+rule plug-in framework (which will be provided in flow linter project repository).
+These files composes an npm package, and it can distributed among users.
+When an user installs the package, an installation script generates
+an HTML file which contains a converted JavaScript code and UI elements for Editor.
+
+If the user installs the package globally (i.e. with `-g` option), the original
+rule code is used for CLI linter command.  If the user install the package into 
+Node-RED's user directory (`~/.node-red` or another directory which is designated by
+`-u` option of node-red command),  Node-RED runtime automatically loads the
+package as a Node-RED node module, and generated code in HTML file is invoked in Editor.
+
+#### New (generic) editor plugin mechanism
+Above mechanism is somewhat tricky and hacky, so we are planning to design a more generic plug-in mechanism of Node-RED. 
+
+### Automatic generation of browser-side code from server-side code
+When validation is invoked in Editor, validation codes is executed in editor. 
+API call from editor to runtime is expensive, and it is need to add extra adminAPI in the core.
+However, managing two versions (for editor and for runtime/CLI) of validation codes is cumbersome process, even if we can use some automatic generation mechanism. 
+
 - Flow-check code in plug-in is used on both CLI (runs on node.js) and Editor (runs on browser).  To use same code in both node.js and browser, there are tools for generate codes for both:
   - [Browserify](http://browserify.org/): get all dependent npm modules and put in one script file.
   - [webpack](https://webpack.js.org/): more general module bundler.
@@ -264,11 +311,10 @@ module.exports = {
   - [Babel](https://babeljs.io/): convert modern JavaScript (ES2015+) code to (traditional) JavaScript code that can be executed on various browsers.
     - It is useful but it is very large project, so we should avoid to make dependency with it.
 
+### Other approach for linting service
 - [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) defines the protocol used between an editor and a language server that provides language features like lint.  It may be alternative option to implement lint function as a language server embedded in a Node-RED server.
     - Language Server Protocol itself is aimed for line-oriented text programming languages.  It is not suitable for visual programming language like Node-RED.  If we adopt the LSP, We might incorporate only their 'Client-Server' architecture, and not incorporate their protocol or data model.
     - If we adopt this architecture, the linter need not to generate code for server and browser.  But we have to estimate an overhead to send flow object from browser to server.
-
-
 
 ## History
 - 2018-12-21 - Initial proposal submitted on [Design note wiki](https://github.com/node-red/node-red/wiki/Design:-Flow-Linter)
@@ -276,4 +322,4 @@ module.exports = {
 - 2019-12-19 - update document structure, and update description of plug-in and API.
 - 2020-04-27 - Plug-in mechanism
 - 2020-06-01 - Update implementation plan
-
+- 2020-07-07 - Move description of editor plug-in mechanism to Appendix
