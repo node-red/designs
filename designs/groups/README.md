@@ -1,5 +1,5 @@
 ---
-state: draft
+state: complete
 ---
 
 # Grouping Nodes
@@ -87,96 +87,37 @@ A group is defined as:
  - **id** - unique identifier for the group
  - **type** - ``"group"``
  - **name** - a user-friendly name for the group
- - **z** - identify the container of the group. If this is a 'top-level' group,
-   it will be the id of the `tab` or `subflow` it is in. If it is nested inside
-   a group it will be the id of the `group`.
+ - **z** - identify the container of the group. This will be the id of the `tab`
+   or `subflow` it is in.
+ - **g** - if the group is nested inside another group, this will be the id of
+   the parent group.
  - **nodes** - an array of node/group ids that are in the group.
  - **style** - an object containing properties related to the appearance of the group.
    These will be roughly consistent with SVG/CSS styles. The exact list of properties
    may change.
     - **stroke**
-    - **stroke-width**
+    - **stroke-opacity**
     - **fill**
     - **fill-opacity**
-    - **width**/**height**
-       - blank/`auto` - determine based on the bounding boxes of the group contents
-       - `fill` - the group will cover the whole canvas in this direction
-    - **padding** - for `auto` width/height, how much space is added around the
-      content's bounding box
+    - **label** - `boolean` - whether to display the name as a label
+    - **label-position** - `string` - where to place the label. This is expressed
+      as compass positions: `nw`,`n`,`ne`,`sw`,`s`,`se`.
+    - **color** - `string` - label text color
+
  - **meta** - (name tbd) - an object of user-defined metadata for the group
-
-
-When a node is added to a group, its `z` property will be updated to be the id
-that group.
-
-I don't think the `x`/`y` properties will be updated - they would remain absolute
-co-ordinates in the tab. This decision may change....
-
-This model means:
-
- - a node cannot be in multiple groups - it is either not in a group, or has a
-   single 'parent' group
- - a group can be in a group (nested groups)
- - groups cannot partially overlap
-
- <details><summary><b>Comments on backwards compatibility</b></summary>
-
- ***
- It is logically consistent for a node's `z` property to be updated to the id of
- the group it is in. That means the `z` is always the immediate container of an
- object.
-
- However that does reduce the backwards compatibility and more work is needed in
- order to identify exactly what nodes are on a given tab.
-
- Something to think more about...
- ***
- </details>
 
 
 ### Flow file representation
 
-There are two options for how a group exists in the flow file.
+Groups are added to the flow as a new `group` node type.
 
-##### Option 1. A `group` node type
-
- - A group would exist as a new node type in the flow file.
-
-**Problem:** Older instances of NR will then refuse to run the flow as they
-don't know what a `group` is.
-
-**Solution:** Release a `1.0.x` that adds logic to filter/ignore this node type.
-This won't help users on older versions, but would possibly help during the
-transition between versions.
-
-**Problem:** Need to check if there are any existing contrib nodes that use the
-type `group`.
-
-**Solution:** Pending the check of the Flow Library, the name of this node type
-may have to change.
+For backwards compatibility, `node-red-node-group` has been published that can
+be installed in older versions of NR to provide a `group` node type. This just
+allows the flow to run - it does not add any group functionality.
 
 
-##### Option 2. Add a `groups` property to the flow/subflow nodes
-
- - The flow (`tab`) and `subflow` type nodes gain a new property called `groups`.
- - This is an array of `group` objects (as described above).
-
- - Each regular node will gain a new property called `g` that will be the `id` of
-the group it is in. If it doesn't have this property then the node is not in a
-group.
-
-**Problem**: If the group definition is in the `tab` node, what happens when a user
-selects a group and exports it? They are exporting a selection of nodes, not a full
-flow - so there is no `tab` node in the exported JSON to hold the group definition.
-
-#### Proposal - Option 1.
-
-Whilst I'm in favour of maximising backwards compatibility (ie Option 2), I think
-that would compromise the flow format and groups would be an obvious 'hack'.
-
-**I propose we go with Option 1** - add a new `group` node type. We should also
-look at what could be done in the 1.0.x stream to add basic support for importing
-such a flow (obviously losing the group functionality when doing so).
+When a node is added to a group, it gains a `g` property that identifies the id
+of the group it is in.
 
 ### User Interaction
 
@@ -194,7 +135,7 @@ different, so we need to identify what feels right in the Node-RED context.
 
 1. The user selects one or more nodes in the workspace
 2. They then create the group by either:
-   - Invoke the new `create-group` action
+   - Invoke the new `core:group-selection` action
    - Use the keyboard shortcut assigned to that action
    - Select the `Create Group` option from the drop-down menu
 
@@ -202,7 +143,7 @@ different, so we need to identify what feels right in the Node-RED context.
 
 1. The user selects a group in the workspace
 2. They then remove the group by either:
-   - Invoke the new `remove-group` action
+   - Invoke the new `core:ungroup-selection` action
    - Use the keyboard shortcut assigned to that action
    - Select the `Remove Group` option from the drop-down menu
 
@@ -244,15 +185,15 @@ accidentally added to a group when moving them around.
 
 ##### Merging selection
 
-Another action will be provided called `merge-selection-to-group` (name tbd). This
+Another action will be provided called `core:merge-selection-to-group`. This
 will merge the current selection into a group.
 
-If all of the selected 'things' are nodes, this is equivalent to the `create-group`
+If all of the selected 'things' are nodes, this is equivalent to the `core:group-selection`
 option.
 
 If there are one or more groups in the selection, they will be merged to be a single
 group. The new group will adopt the appearance of the first group in the selection.
-This is different to the `create-group` action which would create a new group
+This is different to the `core:group-selection` action which would create a new group
 containing the groups.
 
 #### Removing a node from a group
@@ -261,11 +202,14 @@ There's not an obvious way to drag a node out of a group. Maybe adding a combine
 keyboard meta-key + mouse option (We already use `Shift-Drag` to toggle `snap-to-grid`
 whilst dragging). Not sure how intuitive that would be.
 
-An action will be provide called `remove-selection-from-group` (name tbd) that
+As of 1.1.0, no such mouse action has been implement for removing a node from a group.
+
+An action will be provide called `core:remove-selection-from-group` that
 can be used to move the selection out of the group, with a keyboard shortcut
 and menu item.
 
 
 ## History
 
+- 2020-07-09 - Updated to reflect what shipped in 1.1.0
 - 2020-01-15 - Initial proposal
