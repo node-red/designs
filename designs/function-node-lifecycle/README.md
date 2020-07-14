@@ -69,16 +69,16 @@ Add a top-level property named `externalModule` to `settings.js`.  It points to 
     // Example of settings.js
     externalModules: {
         mode: "manual",
-        whiteList: [
+        allowList: [
             "^fs-ext$",       // allow fs-ext
             "^qrcode@1.4.4$"  // allow qrcode version 1.4.4
         ],
-        blackList: [
+        denyList: [
             ".*"              // disallow others 
         ]
     },
 ```
-If the `externalModule` property not exists, `none` mode and blackList of `".*"`, meaning not allow installation and use of external module, is expected as a default.
+If the `externalModule` property not exists, `none` mode and denyList of `".*"`, meaning not allow installation and use of external module, is expected as a default.
 
 #### New API for requesting NPM module
 
