@@ -4,14 +4,8 @@ state: draft
 
 # Message Tracing by metric log 
 
-<!--This is the title of the proposal. It should communicate the key purpose of the
-proposal and will be how it is referred to in general discussion.-->
-
 ## Summary
 
-<!--This section provides the high-level description of the feature being proposed.
-It should provide enough information for end-users to understand what the feature
-is trying to achieve.-->
 To enable precise tracing of each message, we propose to make the runtime emit
 log message whenever the message processing is finished.   For more complex
 tracing for nodes which splitting or joining the messages, these nodes may
@@ -26,13 +20,13 @@ which message is depend on another message.
 
 ### Use case
 
-In debugging, we want to trace the messages. Currently, we use Debug nodes to assure a process in some node is finished. But:
+In debugging, we want to trace the messages. Currently, we use Debug nodes to confirm that a process in some node is finished. But:
 
-- we can't know the message is received and start processing in some node.
-- inserting Debug nodes is cumbersome process, and readability of process become worse.
+- we can't know whether the message is received and start processing in some node.
+- inserting Debug nodes is cumbersome process, and readability become worse.
 
 By enabling metric log, we can see message IDs that is sent/received.
-But, if the node doesn't send a message, we can't assure that
+But, if the node doesn't send a message, we can't confirm that
 the processing in the node is finished.
 
 Moreover, if the node send a message asynchronously, it is difficult
@@ -44,7 +38,7 @@ and the runtime emittted the following metric logs.
 ![sample log](samplelog.png)
 
 Node "D" receives message "X", run join process, and then emit message to node "E",
-but, we can't assure that messages "Y" and "Z" been processed, or still queued in node "D".
+but, we can't confirm that messages "Y" and "Z" been processed, or still queued in node "D".
 
 ### Requirement
 
@@ -92,6 +86,7 @@ For the example shown in Use cases, the proposed metric logging makes message tr
 
 - [Metrics Usage design note](../metrics-usage.md)
 - [Graceful Shutdown design note](../gracerul-shutdown/README.md)
+- [Pluggable Message Routing](../pluggable-message-routing.md)
 
 ## History
 
