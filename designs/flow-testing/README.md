@@ -22,6 +22,7 @@ The test case can describe:
 - Kazuhito Yokoi
 - Yuma Matsuura
 - Brian Innes
+- Nick O'Leary
 
 ## Requirements
 
@@ -71,7 +72,62 @@ This design will not handle any front end testing (dashboards) or Node-RED node 
 
 The rest of this document sets out the proposed design of the testing feature.
 
+### High Level Concept
+
+This is an outline of the proposed testing approach within the Node-RED editor.
+
+ - A user can define a set of named **test suites** that consist of individual **test cases**
+ - For each test case, every node can be configured with a desired behaviour. This will be split into three phases:
+    - **beforeNode** - this phase is triggered when a node receives a message, but *before* the node is given the message. This phase can be used to validate the message arriving.
+
+    - **testNode** - this phase, if defined, is used *instead* of the actual runtime node. This allows the node to be stubbed out, for example a node that writes to database or interacts with an external system. In this phase, the test can:
+      - identify a trigger, either `on-message` or `on-test-start`.
+      - provide simple 'delay' options (for example, `on-test-start wait 100ms then send {payload:"hi"}`. This would be useful if a flow requires testing the behaviour when multiple messages arrive from one or more nodes in particular orders)
+      - send on one or more messages
+      - set status
+      - log an error
+      - ...
+
+    The UI for who the user defines this behaviour needs to be designed. It could be:
+      - a simple set of rules like the Switch/Change nodes. (This feels like the right starting point)
+      - a Function node approach of writing code (Powerful, but not low-code)
+      - use Blockly for a different approach to writing the code (A bit more low-code like, but very different to anything in the core).
+      - be a Node-RED flow (I have reservations over how practical this option would be...)
+
+    - **afterNode** - this phase is triggered whenever the node sends a message, but *before* the next nodes receive it. This phase can be used to validate the message(s) being sent by the node.
+
+  - Any phase will be able to fail the test case
+  - Any phase will be able to mark the test case as having passed.
+  - Every test case *must* have something that will mark the test case as being passed - otherwise the test case will sit waiting and eventually have to timeout (which would be a fail).
+
+With these three phases, a wide range of test scenarios will be possible.
+
+ - the `before/afterNode` phases allow for checks at any point in the flow to ensure a message looks right
+ - the `testNode` phase allows for nodes to be stubbed out with test-scenario specific behaviour
+ - For flows that expose an API, such as `HTTP In` -> `HTTP Response` flows, there would be two different possible approaches to testing it:
+   1. the `testNode` phase of the `HTTP In` node to start the test, and the `beforeNode` of the `HTTP Response` node used to verify the result.
+   2. an entirely separate Test flow could be created with `Inject` -> `HTTP Request` with the `testNode` of the `Inject` node set to start the test, and the `afterNode` of the `HTTP Request` node used to verify the response.
+
+  Both would be valid approaches to writing the test - the main point is this design has the flexibility to support either style.
+
+It must be possible for the user to efficiently disable unrelated nodes entirely on a per-test case basis. For example, if they are testing Flow A, they may not want Flow B attempting to connect to a remote system in the background.
+
+### Running the tests
+
+Running each test case will require starting from a known clean state. For example, if a flow contains a Join node and a test case causes some but not all messages to be passed to it, the node will need to be completely reset before the next test case can start.
+
+The only way to do this is to do a complete stop/start of the flows. This implies the **Test Runner** will need to have access to the **runtime api**. The goal should be for it to be able to operate using the published Runtime API and not use any unpublished APIs (which may drive additional APIs being added to the published set.)
+
+For the `before/after/testNode` phases to be able to intercept messages as they come in and out of nodes, the test runner will need to be in the messaging path. That cannot be done today, but will be possible with the **Pluggable Message Routing** feature.
+
+At a very high level, when the user asks to run some tests, the **Test Runner** will use the **Runtime API** to stop the current flows, then insert the **Test Runner Message Router** into the **Runtime Router Stack**. It will then cycle through all Test Suites and Test Cases, starting the flows, running a test, capturing the result, stopping the flows and then moving onto the next test case.
+
+_Note: At the time of writing, the Pluggable Message Router feature has not been designed. The above description implies a number of requirements on the Message Router design - and they must be taken into account before this feature can make progress._
+
+
 ## Flow testing UI on each node property UI
+
+_The following is a proposal for how the general testing concepts will map onto UI features - this needs further refinement before any UI work is started_
 
 To use the flow testing UI, there's a newly wrench button next to the node property button, node description button and node appearance button on the node property UI.
 Because each node has test UI inside the node itself, we can avoid spaghetti flows which consist of a lot of nodes and wires for testing.
@@ -145,6 +201,7 @@ When running a command like `grunt test-flow`, Node-RED runs flow testing then o
 
 ## History
 
+- 2020-07-17 - Add Concepts section
 - 2020-06-09 - Add requirements
 - 2020-04-13 - Updated proposal
 - 2020-01-31 - Initial proposal
