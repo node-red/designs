@@ -47,6 +47,10 @@ Function node declares its required NPM module list in its settings panel.   For
 
 ![config](./config.png)
 
+A user can use required NPM module through a variable defined in this setting panel.
+
+For example, with above setting, `fs` variable in function node code can access `fs-ext` module without `require` call.
+
 If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime provides a feature for installing different versions.
 
 If Projects feature is enabled, the Node-RED runtime updates project's `package.json` on deploy if specified in `settings.js`.
