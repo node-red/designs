@@ -41,17 +41,15 @@ Following figure shows new lifecycle model of function node.  While creating a f
 
 ### Use of External JavaScript Libraries
 
-New config tab includes declaration of list of JavaScript variable and required module.
+If required modules are not installed, we need a means to install NPM modules from inside Node-RED editor.  This requires considerations on security, restriction of environments, user interaction, and other topics.  In the above lifecycle model, we propose to make automatic (e.g. for headless Node-RED) or interactive module installation selectable by changing a value in `settings.js`.  
+
+Function node declares its required NPM module list in its settings panel.   For interactive mode, users can install, uninstall, or update NPM module from this settings panel.
 
 ![config](./config.png)
 
-If required modules are not installed, we need a means to install NPM modules from inside Node-RED editor.  This requires considerations on security, restriction of environments, user interaction, and other topics.  In the above lifecycle model, we propose to make automatic (e.g. for headless Node-RED) or interactive module installation selectable by changing a value in `settings.js`.  
+If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime provides a feature for installing different versions.
 
-Function node declares its required NPM module list to runtime by using new API.   For interactive mode, we add NPM management UI in editor settings panel.
-
-![require-interaction](./require-interaction.png)
-
-Because current Node-RED implementation starts flow execution before message handler callback is ready, we may need to modify runtime execution model in order to make function nodes wait for receiving messages before required NPM modules become ready to use.
+If Projects feature is enabled, the Node-RED runtime updates project's `package.json` on deploy if specified in `settings.js`.
 
 #### Additional settings for external npm module in `settings.js`
 
@@ -80,21 +78,58 @@ Add a top-level property named `externalModule` to `settings.js`.  It points to 
 ```
 If the `externalModule` property not exists, `none` mode and denyList of `".*"`, meaning not allow installation and use of external module, is expected as a default.
 
-#### New API for requesting NPM module
+#### New API for installing NPM module
 
-- `RED.nodes.registerRequiredModules`(*module*)
+In order to allow NPM modules to be installed automatically before node execution, `RED.nodes.registerType` will be extended to accept new `dynamicModuleList` property in an optional third parameter.  It may have following value:
 
-Requests Node-RED runtime to install NPM module *module*.  Returns a promise that resolves to required module object or rejects if installation failed.  NPM module installation is performed according to specification in `externalModule` property of `settiongs.js` described above.
+1.  a `string` value that represents a property name of a node instance.  The property of the node instance must have a list of modules to install.
 
-If `auto` mode is specified, execution of a function node setup or body that require NPM modules waits for completion of their installation.
+   ```
+   // Node definition
+   RED.nodes.registerType("function", FunctionNode, {
+       dynamicModuleList: "modules"
+   });
+   ```
 
-#### Manual installation of NPM module
+   ```
+   // Node instance definition
+   {
+       ...
+       "modules": [ "fs-ext@1.2.3", "qrcode@1.4.4" ]
+       ...
+   }
+   ```
 
-User Settings panel will be extended to have `Modules` tab.
-It lists up NPM modules requested by `registerRequiredModules`.  
-Entry for already installed NPM module has `check update` button and `uninstall` button. Entry for not installed NPM module has `install` button. 
+2.  a function that accepts node instance definition and returns a list of modules to install.
 
-![modules-tab](./modules-tab.png)
+   ```
+   // Node definition
+   RED.nodes.registerType("function", FunctionNode, {
+       dynamicModuleList: (d) => d.modules.map((e)=>e.name)
+   });
+   ```
+
+   ```
+   // Node instance definition
+   {
+       ...
+       "modules": [ 
+           { 
+               "name": "fs-ext@1.2.3", 
+               "var": "fs", 
+               ... 
+           },
+           { 
+               "name": "qrcode@1.4.4", 
+               "var": "qrcode", 
+               ... 
+           }
+       ],
+       ...
+   }
+   ```
+
+   The Node-RED runtime will scan the list of modules to install in nodes deploy process before starting nodes execution.  A module in the list will be installed, if auto mode is specified in `settings.js` .
 
 
 ### Initialization and Finalization
@@ -123,6 +158,33 @@ Exceptions to the initialization code are logged to console. If error handling i
 
 Export format of function node to Node-RED library currently uses comments to encode properties.  This must be extended to be able to include initialization/finilization code and required npm modules information.
 
+### Additional Properties to Function node
+
+In order to support NPM module installation and initialization/finalization code, following properties are added the Function node.
+
+| ame          | Type            | Description                        |
+| ------------ | --------------- | ---------------------------------- |
+| `initialize` | `string`        | JavaScript code for initialization |
+| `finalize`   | `string`        | JavaScript code for finalization   |
+| `modules`    | array of object | Array of NPM module specifications |
+
+- `initialize`/`finalize` property
+
+  String representation of JavaScript code executed on initialization/finalization of function node.
+
+- `modules` property
+
+  Specify NPM modules that should be installed before execution of `Function` node. It is an array of objects containing following properties:
+
+  | Name     | Type     | Description                    |
+  | -------- | -------- | ------------------------------ |
+  | `spec`   | `string` | NPM install specification      |
+  | `var`    | `string` | JavaScript variable name       |
+  | `status` | `string` | `notinstalled`/`installed`/... |
+  
+  `spec` specifies module specification (e.g. "fs-extra@1.2.3").  `var` defines variable name that can be used to access module object in `Function` node code.  `status` represents current status of the module.
+
+
 ## History
 
   - 2020-02-09 - Initial Note
@@ -130,3 +192,4 @@ Export format of function node to Node-RED library currently uses comments to en
   - 2020-04-10 - Update async processing in initialization code
   - 2020-04-16 - Update message handling received while async initialization
   - 2020-06-01 - Update NPM installation details
+  - 2020-07-23 - Update NPM installation details 
