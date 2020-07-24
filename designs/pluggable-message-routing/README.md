@@ -1,0 +1,263 @@
+---
+state: draft
+---
+
+# Pluggable Message Routing
+
+## Summary
+
+The mechanism by which messages are passed from one node to the next should be
+a pluggable component of the runtime. This would enable, for example, a flow that
+spans multiple runtime instances. Other use cases:
+
+ - flow debugger
+ - adding custom low-level logging of node send/receive events including the
+   full message data
+
+## Authors
+
+ - @knolleary
+
+## Details
+
+### Use Cases
+
+#### 1. Flow debugger
+
+ - the ability to set breakpoints in a flow that will halt the passing of messages
+   and allow a user to inspect the state of the system
+ - provide more detailed information about messages passing through the flows
+   without having to instrument it with multiple Debug nodes.
+
+#### 2. Flow Testing
+
+ - inserting hooks through a flow to verify their behaviour
+ - be able to stub a node in the flow with test-specific behaviour
+
+#### 3. Flows that spanning multiple runtimes
+
+ - instances running on separate cores routed manually or based on a policy or algorithm.
+ - runtimes on separate machines in a cluster
+ - runtimes in a fog deployment, e.g. on devices, gateways, cloud routed dynamically
+   depending on the mobility of a device, associated connectivity, location, etc.
+
+Note: The method for managing and distributing instances running in different cores
+or machines is outside the scope of this design.
+
+
+### High-level design
+
+There are two possible models to use for the pluggable message routing feature.
+
+1. a configurable stack of router layers
+2. a set of life-cycle hooks that can have handlers attached to them
+
+**At this stage, the life-cycle hooks approach is the preferred model.**
+
+#### Stack of layers
+
+The working assumption for this feature has always been to take an approach similar
+to that of Express middleware:
+
+Each message is passed to the top layer of the stack. That layer can do whatever
+it wants with the message before either disposing of it or passing it on to the
+next layer in the stack.
+
+Node-RED would provide a core `LocalRouter` layer that knows how to route messages
+to nodes in the local runtime.
+
+The stack layers could be customised via either the settings file or via runtime API.
+
+The problem with this model comes when you have unrelated things wanting to customise
+the stack.
+
+For example, if a user provided a custom layer to add additional logging, they may
+specify a stack that looks like:
+```
+1. MyCustomLogger
+2. RED.router.LocalRouter
+```
+
+They then enable the Flow Debugger that has to insert itself into this stack. That would
+mean the Flow Debugger would have to keep track of the old stack configuration and be
+able to restore it when the Debugger is disabled.
+
+This could get very complicated to manage.
+
+
+#### Life-Cycle Hooks
+
+This is similar to the Fastify model of registering hooks at certain key points
+in the life-cycle of a message.
+
+Rather than leave the stack as being completely customisable, we recognise there
+is a core set of steps that every message has to go through. Within those steps
+are points where some custom code *might* want to run.
+
+The following diagram shows a possible set of hook points. This list may well get
+refined as the design progresses. The orange lines show the span of synchronous calls.
+
+![](message-router-events.png)
+
+1. `preSend` - passed an array of `SendEvent` objects. The messages inside these objects
+   are exactly what the node has passed to `node.send` - meaning there could be duplicate
+   references to the same message object.
+
+2. `preRoute` - called once for each SendEvent object in turn
+
+3. `onSend` - the local router has identified the node it is going to send to. At
+   this point, the message has been cloned if needed.
+
+4. `postSend` - the message has been dispatched to be delivered asynchronously
+(unless the sync delivery flag is set, in which case it would be continue as synchronous delivery)
+
+5. `onReceive` - a node is about to receive a message
+
+6. `postReceive` - the message has been passed to the node's `input` handler
+
+7. `onDone`, `onError` - the node has completed with a message or logged an error
+
+
+*The exact function signature for each of these hooks needs to be designed.*
+
+They operate on `SendEvent` objects. Each objects contains the message and metadata
+needed through the process.
+
+They start out looking like:
+
+```json
+{
+    "msg": "<message object>",
+    "source": {
+        "id": "<node-id>",
+        "node": "<node-object>",
+        "port": "<index of port being sent on>",
+    },
+    "destination": {
+        "id": "<node-id>",
+        "node": undefined,
+    },
+    "cloneMessage": "true|false"
+}
+```
+
+##### Scenario: custom cloning behaviour
+
+The initial logic around what messages get cloned does not change - the node
+identifies if cloning needs to occur based on how many nodes it is wired to and
+how many messages it is asked to send in a single go.
+
+Rather than do the cloning, the node will set the `cloneMessage` property to indicated
+whether cloning should occur or not.
+
+The actual cloning would happen between the `preRoute` and `onSend` steps.
+
+This would allow a `preRoute` handler to do its own cloning behaviour and then set
+`cloneMessage` to `false` so that no further cloning would happen for that message.
+
+One very important aspect to highlight is that messages will not be cloned until
+after the `preRoute` stage - so any modifications of the message will potentially
+mutate multiple messages. If earlier handlers want to modify the message in any
+way, they will have to honour the `cloneMessage` flag and clone the message themselves.
+
+
+##### Scenario: remote message routing
+
+The `preRoute` step can be used to do remote message routing. As no message cloning
+has happened by this point, it avoids that overhead when serialising the message
+to send over the network serves the same purpose.
+
+All steps, up to and including `onReceive` will have a way to tell the runtime to
+stop processing that message and to not pass it on to any later steps. This would
+allow a `preRoute` handler to decide a message must be sent to a remote runtime
+and that no further local processes was needed.
+
+##### Scenario: flow debugger - breakpoints
+
+A breakpoint could be triggered when a node sends a message or receives one.
+
+To break on node send, it would either register a handler on the `preSend` step
+(if it was necessary to break before *any* of the messages sent in that one call
+are processed) or `preRoute` if it works on a single message. That's a question
+for the Flow Debugger design and doesn't need addressing now. However, the options
+are there.
+
+To break on node receive, it would register on `preReceive`.
+
+In either case, if the breakpoint is triggered, the flow debugger needs to be able
+to indefinitely halt the passing of messages.
+
+This informs us that all of the handlers need to be able to complete asynchronously -
+so the flow debugger can defer sending on any messages until it is resumed. It would
+also allow the flow debugger to do step-debugging, by registering handlers at every
+step.
+
+##### Scenario: flow testing
+
+The flow testing design introduces the ability to:
+ - verify the contents/structure of a message being passed to a node
+ - verify the contents/structure of a message send by a node
+ - stub out an entire node with custom test-case-specific behaviour
+
+That maps to the steps:
+ - `onReceive` - verify message passed to a node
+ - `preSend` - verify the message(s) sent by a node
+ - `preRoute` - pass the message to a Test Stub node instead of the real node
+
+
+##### Scenario: custom logging
+
+Custom handlers added at any of the steps will be able to log whatever information
+is needed.
+
+#### Configuring Hooks
+
+Hooks will be registered in one of two ways - either via settings file for static
+configuration, or runtime API for dynamic configuration.
+
+##### Settings file
+
+***Not a final design - just an initial concept to try***
+
+```javascript
+{
+    "router": {
+        "preSend": [
+            function(...) {  }
+        ],
+        "preReceive": [
+            function(...) {  }
+        ]
+    }
+
+}
+```
+
+##### Runtime API
+
+***Not a final design - just an initial concept to try***
+
+ - `RED.<something>.addHook('<name>', function(...) { })`
+ - `RED.<something>.removeHook('<name>')`
+
+
+The `<name>` will be the name of the step to register the hook on - `preSend`, etc.
+
+It can optionally be suffixed with an identifier for the hook -  `preSend.flow-debugger`.
+That identifier can then be used with `removeHook` to remove the handler later on.
+
+Alternatively, `removeHook` could also accept the `function` that was originally
+registered as a second argument.
+
+
+
+## Reference
+
+ - https://trello.com/c/J7UDbQVP/66-pluggable-message-routing
+ - https://github.com/node-red/node-red/wiki/Pluggable-Message-Routing
+
+## History
+
+
+- 2020-07-24 - Updated to add 'hooks' concept
+- 2019-03-27 - Initial proposal submitted
