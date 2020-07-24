@@ -104,12 +104,12 @@ In order to allow NPM modules to be installed automatically before node executio
    }
    ```
 
-2.  a function that accepts node instance definition and returns a list of modules to install.
+2.  or an array of Objects that must have a `name` property (but can have any other properties)
 
    ```
    // Node definition
    RED.nodes.registerType("function", FunctionNode, {
-       dynamicModuleList: (d) => d.modules.map((e)=>e.name)
+       dynamicModuleList: "modules"
    });
    ```
 
@@ -180,13 +180,12 @@ In order to support NPM module installation and initialization/finalization code
 
   Specify NPM modules that should be installed before execution of `Function` node. It is an array of objects containing following properties:
 
-  | Name     | Type     | Description                    |
-  | -------- | -------- | ------------------------------ |
-  | `spec`   | `string` | NPM install specification      |
-  | `var`    | `string` | JavaScript variable name       |
-  | `status` | `string` | `notinstalled`/`installed`/... |
+  | Name   | Type     | Description               |
+  | ------ | -------- | ------------------------- |
+  | `spec` | `string` | NPM install specification |
+  | `var`  | `string` | JavaScript variable name  |
   
-  `spec` specifies module specification (e.g. "fs-extra@1.2.3").  `var` defines variable name that can be used to access module object in `Function` node code.  `status` represents current status of the module.
+  `spec` specifies module specification (e.g. "fs-extra@1.2.3").  `var` defines variable name that can be used to access module object in `Function` node code.  
 
 
 ## History
@@ -196,4 +195,5 @@ In order to support NPM module installation and initialization/finalization code
   - 2020-04-10 - Update async processing in initialization code
   - 2020-04-16 - Update message handling received while async initialization
   - 2020-06-01 - Update NPM installation details
-  - 2020-07-23 - Update NPM installation details 
+  - 2020-07-23 - Update NPM installation details
+  - 2020-07-24 - More update NPM installation details
