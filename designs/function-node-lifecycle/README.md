@@ -51,7 +51,7 @@ A user can use required NPM module through a variable defined in this setting pa
 
 For example, with above setting, `fs` variable in function node code can access `fs-ext` module without `require` call.
 
-If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime provides a feature for installing different versions.
+If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime provides APIs for installing different versions.  Using this APIs, NPM modules can be installed locally to each function node.
 
 If Projects feature is enabled, the Node-RED runtime updates project's `package.json` on deploy if specified in `settings.js`.
 
@@ -104,7 +104,7 @@ In order to allow NPM modules to be installed automatically before node executio
    }
    ```
 
-2.  or an array of Objects that must have a `name` property (but can have any other properties)
+2. or an array of Objects that must have a `name` property and may have a `scope` propety (but can have any other properties)
 
    ```
    // Node definition
@@ -120,11 +120,13 @@ In order to allow NPM modules to be installed automatically before node executio
        "modules": [ 
            { 
                "name": "fs-ext@1.2.3", 
+               "scope": "function:xyz",
                "var": "fs", 
                ... 
            },
            { 
                "name": "qrcode@1.4.4", 
+               "scope": "function:xyz",
                "var": "qrcode", 
                ... 
            }
@@ -133,8 +135,95 @@ In order to allow NPM modules to be installed automatically before node executio
    }
    ```
 
-   The Node-RED runtime will scan the list of modules to install in nodes deploy process before starting nodes execution.  A module in the list will be installed, if auto mode is specified in `settings.js` .
+   The Node-RED runtime will scan the list of modules to install in nodes deploy process before starting nodes execution.  A module in the list will be installed, if auto mode is specified in `settings.js` .  If `scope` is specified, NPM module is installed locally to specified scope.  On removal of a node with locally installed NPM modules, the node must uninstall the installed modules.
 
+   In order to support installation of NPM modules, the Node-RED runtime provides following  API:
+
+   - `RED.require(module, opt)`
+
+     `RED.require` function is extended to accept second parameter.  If the second parameter is provided, *module* parameter represents NPM module specification.  And *opt* must be an object that must have `type` property.  The `type` property  have one of `stat`/`install`/`uninstall`/`update`.
+
+     In order to allow different versions of NPM module can be used by different nodes, the modules can be made local to specified scope. 
+
+     For each `type` value, `opt` object have following additional properties and `RED.require` returns a Promise that resolves to following result values:
+
+     - `stat`: get status of NPM module
+
+       - `opt` object:
+
+         | name | type   | required | description         |
+         | ---- | ------ | -------- | ------------------- |
+         | `id` | string | no       | ID of target module |
+
+       - result: information of NPM module
+
+         | name  | type   | description                                  |
+         | ----- | ------ | -------------------------------------------- |
+         | scope | string | ID of the module, otherwise `null`           |
+         | name  | object | object containing module version information |
+
+         `name` property points to an object with following properties:
+
+         | name      | type   | description                                               |
+         | --------- | ------ | --------------------------------------------------------- |
+         | installed | string | version string if installed, otherwise `null`             |
+         | current   | string | version string if latest version exists, otherwise `null` |
+
+     - `list`: list installed NPM module
+
+       - `opt` object: 
+
+         | name  | type   | description     |
+         | ----- | ------ | --------------- |
+         | scope | string | scope of module |
+
+       - result: array of objects with following properties that represents installed module information 
+
+         | name | type   | description      |
+         | ---- | ------ | ---------------- |
+         | id   | string | ID of the module |
+         | name | object | version string   |
+
+     - `install`: install NPM module 
+
+       - `opt` object:
+
+         | name          | type   | required | description                                     |
+         | ------------- | ------ | -------- | ----------------------------------------------- |
+         | scope         | string | no       | make installed module local to specified scope. |
+         | updatePackage | bool   | no       | update `package.json` for Projects              |
+
+       - result: installed object information
+
+         | name   | type   | description             |
+         | ------ | ------ | ----------------------- |
+         | id     | string | ID of installed object  |
+         | module | object | installed module object |
+
+     - `uninstall`
+
+       - `opt` object:
+
+         | name | type   | required | description         |
+         | ---- | ------ | -------- | ------------------- |
+         | id   | string | no       | ID of target module |
+
+       - result: none
+
+     - `update`
+
+       - `opt` object
+
+         | name | type   | required | description         |
+         | ---- | ------ | -------- | ------------------- |
+         | id   | string | no       | ID of target module |
+
+       - result: updated object information
+
+         | name   | type   | description           |
+         | ------ | ------ | --------------------- |
+         | id     | string | ID of updated object  |
+         | module | object | updated module object |
 
 ### Initialization and Finalization
 
@@ -196,4 +285,4 @@ In order to support NPM module installation and initialization/finalization code
   - 2020-04-16 - Update message handling received while async initialization
   - 2020-06-01 - Update NPM installation details
   - 2020-07-23 - Update NPM installation details
-  - 2020-07-24 - More update NPM installation details
+  - 2020-07-25 - More update on details of NPM installation
