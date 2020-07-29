@@ -217,7 +217,9 @@ configuration, or runtime API for dynamic configuration.
 
 ##### Settings file
 
-***Not a final design - just an initial concept to try***
+It will be possible to register hooks via the settings file.
+The names of the properties shown here still need to be decided on. This just
+gives a sense of the type of thing that will be possible.
 
 ```javascript
 {
@@ -235,19 +237,42 @@ configuration, or runtime API for dynamic configuration.
 
 ##### Runtime API
 
-***Not a final design - just an initial concept to try***
-
- - `RED.<something>.addHook('<name>', function(...) { })`
- - `RED.<something>.removeHook('<name>')`
-
+ - `RED.hooks.add('<name>', function(...) { })`
+ - `RED.hooks.remove('<name>')`
 
 The `<name>` will be the name of the step to register the hook on - `preSend`, etc.
 
-It can optionally be suffixed with an identifier for the hook -  `preSend.flow-debugger`.
-That identifier can then be used with `removeHook` to remove the handler later on.
+It can optionally be suffixed with a label for the hook -  `preSend.flow-debugger`.
+That label can then be used with `RED.hooks.remove` to remove the handler later on.
 
-Alternatively, `removeHook` could also accept the `function` that was originally
-registered as a second argument.
+To remove *all* hooks with a given label, `*.flow-debugger` can be used.
+
+When invoked, the hook handler will be called with a single payload object - the details
+of which will be specific to the hook.
+
+The handler can take an optional second argument - a callback function to call
+when the handler has finished its work.
+
+When the handler finishes its work it must either:
+ - return normally
+ - call the callback function with no arguments
+ - return a promise that resolves
+
+Any modifications it has made to the payload object will be passed on.
+
+If the handler wants to stop further processing of the event (for example, the Remote Router
+would not want a message to pass on to the local router), it must either:
+ - return `false` (strictly `false` - not a false-like value)
+ - call the callback function with `false`
+ - return a promise that resolves with the value `false`.
+
+If the handler encounters an error that should be logged it must either:
+ - throw an Error
+ - call the callback function with the Error
+ - return a promise that rejects with the Error
+
+If a function is defined as the two-argument version (accepting the callback function),
+it *must* use that callback - any value it returns will be ignored.
 
 
 
