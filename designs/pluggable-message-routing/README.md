@@ -99,31 +99,30 @@ refined as the design progresses. The orange lines show the span of synchronous 
 
 ![](message-router-events.png)
 
-1. `preSend` - passed an array of `SendEvent` objects. The messages inside these objects
+![](message-router-events.png)
+
+1. `onSend` - passed an array of `SendEvent` objects. The messages inside these objects
    are exactly what the node has passed to `node.send` - meaning there could be duplicate
    references to the same message object.
 
-2. `preRoute` - called once for each SendEvent object in turn
+2. `preRoute` - passed a `SendEvent`
 
-3. `onSend` - the local router has identified the node it is going to send to. At
-   this point, the message has been cloned if needed.
+3. `preDeliver` - passed a `SendEvent`. The local router has identified
+   the node it is going to send to. At this point, the message has been cloned if needed.
 
-4. `postSend` - the message has been dispatched to be delivered asynchronously
-(unless the sync delivery flag is set, in which case it would be continue as synchronous delivery)
+4. `postDeliver` - passed a `SendEvent`. The message has been dispatched
+    to be delivered asynchronously (unless the sync delivery flag is set, in
+    which case it would be continue as synchronous delivery)
 
-5. `onReceive` - a node is about to receive a message
+5. `onReceive` - passed a `ReceiveEvent` when a node is about to receive a message
 
-6. `postReceive` - the message has been passed to the node's `input` handler
+6. `postReceive` - passed a `ReceiveEvent` when the message has been
+    given to the node's `input` handler(s)
 
-7. `onDone`, `onError` - the node has completed with a message or logged an error
+7. `onComplete` - passed a `CompleteEvent` when the node has completed with a message or logged an error
 
 
-*The exact function signature for each of these hooks needs to be designed.*
-
-They operate on `SendEvent` objects. Each objects contains the message and metadata
-needed through the process.
-
-They start out looking like:
+##### `SendEvent` object
 
 ```json
 {
@@ -140,6 +139,30 @@ They start out looking like:
     "cloneMessage": "true|false"
 }
 ```
+##### `ReceiveEvent` object
+
+```json
+{
+    "msg": "<message object>",
+    "destination": {
+        "id": "<node-id>",
+        "node": "<node-object>",
+    }
+}
+```
+
+##### `CompleteEvent` object
+
+```json
+{
+    "msg": "<message object>",
+    "node": {
+        "id": "<node-id>",
+        "node": "<node-object>"
+    },
+    "error": "<error passed to done, otherwise, undefined>"
+}
+```
 
 ##### Scenario: custom cloning behaviour
 
@@ -150,7 +173,7 @@ how many messages it is asked to send in a single go.
 Rather than do the cloning, the node will set the `cloneMessage` property to indicated
 whether cloning should occur or not.
 
-The actual cloning would happen between the `preRoute` and `onSend` steps.
+The actual cloning would happen between the `preRoute` and `preDeliver` steps.
 
 This would allow a `preRoute` handler to do its own cloning behaviour and then set
 `cloneMessage` to `false` so that no further cloning would happen for that message.
@@ -176,7 +199,7 @@ and that no further local processes was needed.
 
 A breakpoint could be triggered when a node sends a message or receives one.
 
-To break on node send, it would either register a handler on the `preSend` step
+To break on node send, it would either register a handler on the `onSend` step
 (if it was necessary to break before *any* of the messages sent in that one call
 are processed) or `preRoute` if it works on a single message. That's a question
 for the Flow Debugger design and doesn't need addressing now. However, the options
@@ -201,7 +224,7 @@ The flow testing design introduces the ability to:
 
 That maps to the steps:
  - `onReceive` - verify message passed to a node
- - `preSend` - verify the message(s) sent by a node
+ - `onSend` - verify the message(s) sent by a node
  - `preRoute` - pass the message to a Test Stub node instead of the real node
 
 
@@ -224,7 +247,7 @@ gives a sense of the type of thing that will be possible.
 ```javascript
 {
     "router": {
-        "preSend": [
+        "onSend": [
             function(...) {  }
         ],
         "preReceive": [
@@ -240,9 +263,9 @@ gives a sense of the type of thing that will be possible.
  - `RED.hooks.add('<name>', function(...) { })`
  - `RED.hooks.remove('<name>')`
 
-The `<name>` will be the name of the step to register the hook on - `preSend`, etc.
+The `<name>` will be the name of the step to register the hook on - `onSend`, etc.
 
-It can optionally be suffixed with a label for the hook -  `preSend.flow-debugger`.
+It can optionally be suffixed with a label for the hook -  `onSend.flow-debugger`.
 That label can then be used with `RED.hooks.remove` to remove the handler later on.
 
 To remove *all* hooks with a given label, `*.flow-debugger` can be used.
@@ -274,6 +297,19 @@ If the handler encounters an error that should be logged it must either:
 If a function is defined as the two-argument version (accepting the callback function),
 it *must* use that callback - any value it returns will be ignored.
 
+
+###### Hooks vs Events
+
+The runtime API already provides `RED.events` where handlers can be registered
+for certain runtime events. At a glance, that sounds very similar to the new `RED.hooks`
+api. So it is reasonable to ask what the difference is. Here is how we distinguish
+them:
+
+ - **Events** - are *notifications* that something has happened. The event handler
+   cannot have any direct influence on the event.
+ - **Hooks** - are handlers that are inserted into the code path when something
+   happens. The hooks can modify the data being passed through and can halt the
+   onward processing
 
 
 ## Reference
