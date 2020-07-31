@@ -65,21 +65,20 @@ where:
 
 Emit metric log when sent a message which is related to other messages using:
 ```
-node.metric("correlate", msg, relatedMsgIds)
+node.metric("correlate", msg, {relationType: relatedMsgIds})
 ```
 where:
 - msg: message in process.  For example, when join node send a concatenated message, use the message as an argument of `node.metric()`.
+- relationType: a relation type, such as `join`, `splitInto`, `isDependsOn`, etc.
 - relatedMsgIds: array of ids of related messages.
-
-Note: we can put more complex information on the third argument of `node.metric()`.  For example, we can make it a object which contains a array of message ids and a relation type such as `"isPartOf"`, `"splitInto"`, `"isDependsOn"`, etc.
 
 ### Usage example
 
 For the example shown in Use cases, the proposed metric logging makes message traceable.  
 
-![Correlation](correlationlog.png)
+![Correlation](correlationlog.svg)
 
-- by `node.join.correlate` event, we can assume that message X is related to message Y and Z.
+- by `node.join.correlate` event, we can assume that message X is joined with message Y and Z.
 - by `node.join.done` event, we can assume that processing of message X, Y and Z are completed.
 
 ## Related topics
