@@ -99,8 +99,6 @@ refined as the design progresses. The orange lines show the span of synchronous 
 
 ![](message-router-events.png)
 
-![](message-router-events.png)
-
 1. `onSend` - passed an array of `SendEvent` objects. The messages inside these objects
    are exactly what the node has passed to `node.send` - meaning there could be duplicate
    references to the same message object.
