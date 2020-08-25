@@ -72,6 +72,17 @@ where:
 - relationType: a relation type, such as `join`, `splitInto`, `isDependsOn`, etc.
 - relatedMsgIds: array of ids of related messages.
 
+For example, in Join node, the metric is emitted at end of each completion of message joining process:
+```
+var completeSend = function(partId) {
+    ...
+    // (assume the module maintains message Ids of combined messages in group.combinedMsgInfo[].id)
+    node.send(RED.util.cloneMessage(group.msg));
+    node.metric("correlate", group.msg, {join: group.combinedMsgInfo.map(e=>e.id)});
+}
+``` 
+(from https://github.com/node-red/node-red/blob/master/packages/node_modules/%40node-red/nodes/core/sequence/17-split.js#L483).
+
 ### Usage example
 
 For the example shown in Use cases, the proposed metric logging makes message traceable.  
