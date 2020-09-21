@@ -233,28 +233,13 @@ is needed.
 
 #### Configuring Hooks
 
-Hooks will be registered in one of two ways - either via settings file for static
-configuration, or runtime API for dynamic configuration.
+Hooks will be registered via a runtime API initially.
 
-##### Settings file
+In the future, we may add support for adding them via the settings file, however the
+focus for this feature is not for end-users to manually configure it. Exposing it
+via the settings file at this point in time would set the wrong expectation for
+who uses this API.
 
-It will be possible to register hooks via the settings file.
-The names of the properties shown here still need to be decided on. This just
-gives a sense of the type of thing that will be possible.
-
-```javascript
-{
-    "router": {
-        "onSend": [
-            function(...) {  }
-        ],
-        "preReceive": [
-            function(...) {  }
-        ]
-    }
-
-}
-```
 
 ##### Runtime API
 
