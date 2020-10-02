@@ -1,5 +1,5 @@
 ---
-state: draft
+state: complete
 ---
 
 # Pluggable Message Routing
@@ -94,16 +94,18 @@ Rather than leave the stack as being completely customisable, we recognise there
 is a core set of steps that every message has to go through. Within those steps
 are points where some custom code *might* want to run.
 
-The following diagram shows a possible set of hook points. This list may well get
-refined as the design progresses. The orange lines show the span of synchronous calls.
+The following diagram shows the set of hook points in the messaging path. The orange
+lines show the span of synchronous calls. This has important implications in terms
+of whether a hook handler can be synchronous or asynchronous and what responsibilities
+it has.
 
 ![](message-router-events.png)
 
 1. `onSend` - passed an array of `SendEvent` objects. The messages inside these objects
    are exactly what the node has passed to `node.send` - meaning there could be duplicate
-   references to the same message object.
+   references to the same message object. *See below regarding [async vs sync handlers](#async-vs-sync-handlers)*
 
-2. `preRoute` - passed a `SendEvent`
+2. `preRoute` - passed a `SendEvent`. *See below regarding [async vs sync handlers](#async-vs-sync-handlers)*
 
 3. `preDeliver` - passed a `SendEvent`. The local router has identified
    the node it is going to send to. At this point, the message has been cloned if needed.
@@ -161,6 +163,25 @@ refined as the design progresses. The orange lines show the span of synchronous 
     "error": "<error passed to done, otherwise, undefined>"
 }
 ```
+
+
+#### Async vs Sync handlers
+
+Due to the requirements of the messaging path, some hook handlers must complete
+their work synchronously.
+
+The `onSend` and `preRoute` hooks are triggered *before* any message cloning has
+happened. If they complete asynchronously, execution will return to the calling
+node *without* the message having been cloned. That will lead to unexpected issues
+as the node may modify the message object before the original version has been delivered.
+
+If `onSend` and `preRoute` hooks need to do asynchronous work before the event passes
+on, and the `cloneMessage` property is set to `true`, then they *must* clone and
+replace the message object in the event object. They *must* also set the `cloneMessage`
+property to false to ensure no subsequent cloning happens for the message.
+
+Subsequent hooks are called *after* the platform has done any required cloning, so
+are free to act asynchronously or synchronously.
 
 ##### Scenario: custom cloning behaviour
 
@@ -303,5 +324,6 @@ them:
 ## History
 
 
+- 2020-10-01 - Added to 1.2 release
 - 2020-07-24 - Updated to add 'hooks' concept
 - 2019-03-27 - Initial proposal submitted
