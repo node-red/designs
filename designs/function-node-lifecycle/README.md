@@ -51,7 +51,7 @@ A user can use required NPM module through a variable defined in this setting pa
 
 For example, with above setting, `fs` variable in function node code can access `fs-ext` module without `require` call.
 
-If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime provides APIs for installing different versions.  Using this APIs, NPM modules can be installed locally to each function node.
+If a user specifies different versions of NPM module, version conflicts may occur.  The Node-RED runtime allows installing different versions of NPM modules.  
 
 If Projects feature is enabled, the Node-RED runtime updates project's `package.json` on deploy if specified in `settings.js`.
 
@@ -104,7 +104,7 @@ In order to allow NPM modules to be installed automatically before node executio
    }
    ```
 
-2. or an array of Objects that must have a `name` property and may have a `scope` propety (but can have any other properties)
+2. or an array of objects that must have a `name` property and may have a `scope` propety (but can have any other properties)
 
    ```
    // Node definition
@@ -137,93 +137,24 @@ In order to allow NPM modules to be installed automatically before node executio
 
    The Node-RED runtime will scan the list of modules to install in nodes deploy process before starting nodes execution.  A module in the list will be installed, if auto mode is specified in `settings.js` .  If `scope` is specified, NPM module is installed locally to specified scope.  On removal of a node with locally installed NPM modules, the node must uninstall the installed modules.
 
-   In order to support installation of NPM modules, the Node-RED runtime provides following  API:
+   In order to support installation of NPM modules, the Node-RED runtime provides following API:
 
-   - `RED.require(module, opt)`
+   - Runtime API for Nodes
 
-     `RED.require` function is extended to accept second parameter.  If the second parameter is provided, *module* parameter represents NPM module specification.  And *opt* must be an object that must have `type` property.  The `type` property  have one of `stat`/`install`/`uninstall`/`update`.
+     - `RED.nodes.addModule(opts)`
+     - `RED.nodes.removeModule(opts)`
+     - `RED.nodes.getModuleInfo(opts)`
 
-     In order to allow different versions of NPM module can be used by different nodes, the modules can be made local to specified scope. 
+     Node API for nodes is extended to include these functions.  These new APIs accept the same parameter object `opts` to corresponding runtime APIs but works on generic NPM modules. 
 
-     For each `type` value, `opt` object have following additional properties and `RED.require` returns a Promise that resolves to following result values:
+   - Editor API
 
-     - `stat`: get status of NPM module
-
-       - `opt` object:
-
-         | name | type   | required | description         |
-         | ---- | ------ | -------- | ------------------- |
-         | `id` | string | no       | ID of target module |
-
-       - result: information of NPM module
-
-         | name  | type   | description                                  |
-         | ----- | ------ | -------------------------------------------- |
-         | scope | string | ID of the module, otherwise `null`           |
-         | name  | object | object containing module version information |
-
-         `name` property points to an object with following properties:
-
-         | name      | type   | description                                               |
-         | --------- | ------ | --------------------------------------------------------- |
-         | installed | string | version string if installed, otherwise `null`             |
-         | current   | string | version string if latest version exists, otherwise `null` |
-
-     - `list`: list installed NPM module
-
-       - `opt` object: 
-
-         | name  | type   | description     |
-         | ----- | ------ | --------------- |
-         | scope | string | scope of module |
-
-       - result: array of objects with following properties that represents installed module information 
-
-         | name | type   | description      |
-         | ---- | ------ | ---------------- |
-         | id   | string | ID of the module |
-         | name | object | version string   |
-
-     - `install`: install NPM module 
-
-       - `opt` object:
-
-         | name          | type   | required | description                                     |
-         | ------------- | ------ | -------- | ----------------------------------------------- |
-         | scope         | string | no       | make installed module local to specified scope. |
-         | updatePackage | bool   | no       | update `package.json` for Projects              |
-
-       - result: installed object information
-
-         | name   | type   | description             |
-         | ------ | ------ | ----------------------- |
-         | id     | string | ID of installed object  |
-         | module | object | installed module object |
-
-     - `uninstall`
-
-       - `opt` object:
-
-         | name | type   | required | description         |
-         | ---- | ------ | -------- | ------------------- |
-         | id   | string | no       | ID of target module |
-
-       - result: none
-
-     - `update`
-
-       - `opt` object
-
-         | name | type   | required | description         |
-         | ---- | ------ | -------- | ------------------- |
-         | id   | string | no       | ID of target module |
-
-       - result: updated object information
-
-         | name   | type   | description           |
-         | ------ | ------ | --------------------- |
-         | id     | string | ID of updated object  |
-         | module | object | updated module object |
+     Currently no editor APIs and endpoints are publicly provided for installing NPM module. But, following endpoints will be used for interaction between editor and runtime for fnction node:
+     
+     - `PUT /function/modules/` - install or update NPM module
+     - `GET /function/modules/` - get a list of installed NPM modules
+     - `GET /function/modules/:module` - get a NPM module's information
+     - `DELETE /function/modules/:module` - uninstall a NPM module
 
 ### Initialization and Finalization
 
@@ -286,3 +217,4 @@ In order to support NPM module installation and initialization/finalization code
   - 2020-06-01 - Update NPM installation details
   - 2020-07-23 - Update NPM installation details
   - 2020-07-25 - More update on details of NPM installation
+  - 2020-10-30 - Update internal APIs
