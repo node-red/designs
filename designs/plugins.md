@@ -51,8 +51,10 @@ The main points this design needs to cover are:
 
 ### Plugin registration
 
+The following applies to both editor and runtime plugins.
+
 ```
-RED.plugins.register("plugin-identifier", {
+RED.plugins.registerPlugin("plugin-identifier", {
     type: "plugin-type",
     onadd: function() {},
     onremove: function() {}
@@ -72,7 +74,7 @@ When this register function is called, the following things will happening
  - The `"registry:plugin-added"` event is emitted with the name of the plugin as its payload
 
 The `onremove` function is called when the plugin is removed due to the module being
-disabled or uninstalled.
+disabled or uninstalled. *TODO*: not clear if we'll support removing plugins dynamically.
 
 
 
@@ -103,23 +105,120 @@ it loads the palette of nodes.
 
 This does mean a new admin api will be needed in order to serve the plugins.
 
+### Settings
+
+Plugins provide a way to custom and extended both the Node-RED editor and runtime.
+
+It may not always be a good thing to allow a user to install random plugins. For example,
+when Node-RED is embedded into another application, such as the commercial adopters.
+
+In those scenarios, they may want to take advantage of plugins to provide customisations,
+but not allow the end user to install/remove those plugins.
+
+For this feature then, there are some use cases to consider:
+
+ - enable/disable loading of plugins entirely
+ - disable dynamic loading of plugins - only those loaded at startup are loaded
+ - equivalent of `nodeExcludes`/`nodeIncludes` to identify specific modules that
+   either may or may not be loaded. This applies beyond just plugins - we've
+   needed a way to allow/deny modules by name for some time.
+
+The details of this are being [discussed here](https://github.com/node-red/designs/discussions/40).
+
+
+
 ### HTTP Admin API
 
-#### `GET /plugins`
-
- - `Content-Type: application/json` - returns a list of the installed plugins
- - `Content-Type: text/html` - returns the html content of all installed plugins
+ - `GET /plugins`
+   - `Content-Type: application/json` - returns a list of the loaded plugins (see below for format)
+   - `Content-Type: text/html` - returns the html content of all loaded plugins
+ - `GET /plugins/messages` - returns the message catalogs for all loaded plugins
 
 TODO: need to figure out what other admin endpoints are needed.
 
+### `@node-red/runtime` API
+
+The following functions will be added to the external runtime API:
+
+ - `plugins.getPluginList` - returns a promise that resolves to the list of loaded plugins (see below for format)
+ - `plugins.getPluginConfigs` - returns a promise that resolves to the HTML content for loaded plugins
+ - `plugins.getPluginCatalogs` - returns a promise that resolves to the message catalogs for all loaded plugins
+
+The following functions will be added to the internal runtime API:
+
+- `RED.plugins.registerPlugin` - register a new runtime plugin
+- `RED.plugins.getPlugin` - get a plugin by id
+- `RED.plugins.getPluginsByType` - get all plugins of a given type
+- `RED.plugins.getPluginList` - get a list of the loaded plugins (see below for format)
+- `RED.plugins.getPluginConfigs` - get the message catalogs for all loaded plugins
+
+These functions all pass through to the `@node-red/registry` module...
+
+
+### `@node-red/registry` API
+
+ - `registerPlugin` - register a new runtime plugin
+ - `getPlugin` - get a plugin by id
+ - `getPluginsByType` - get all plugins of a given type
+ - `getPluginList` - get a list of the loaded plugins (see below for format)
+ - `getPluginConfigs` - get the message catalogs for all loaded plugins
+
+### Node/Plugin Runtime API
+
+The `RED` object passed to nodes/plugins will now include a `plugins` object with the functions:
+ - `registerPlugin` - register a new runtime plugin
+ - `getPlugin` - get a plugin by id
+ - `getPluginsByType` - get all plugins of a given type
+
+
+#### Plugin List format
+
+This follows the same basic structure as the node list format:
+
+```
+[
+    {
+        "id": "test-plugin/test",
+        "name": "test",
+        "enabled": true,
+        "local": true,
+        "module": "test-plugin",
+        "plugins": [
+            {
+                "type": "foo",
+                "id": "my-test-plugin",
+                "module": "test-plugin"
+            }
+        ],
+        "editor": true,
+        "runtime": true,
+        "version": "1.0.0"
+    }
+]
+```
+
+Each entry in the array represents a separate set of plugins - ie a separate entry in
+the `package.json`. The properties are:
+
+ - `id` - the module/set
+ - `name` - the set name
+ - `enabled` - whether the plugin is enabled (*TODO* this is a hangover from nodes. Not sure if we'll
+ support dynamic enable/disable of nodes)
+ - `local` - whether the module is installed in `~/.node-red` or not - only local modules can be removed. (*TODO* another hangover
+     from nodes)
+ - `module` - the module name
+ - `plugins` - an array of the plugins provided by this set
+ - `editor` - boolean flag to say if this is an editor plugin (ie, provides an html file)
+ - `runtime` - boolean flag to say if this is a runtime plugin (ie, provides a js file)
+ - `version` - npm module version
 
 ### Editor APIs
 
-As mentioned above, `RED.plugins` will be a new module in the Editor. It will expose the functions:
+`RED.plugins` will be a new module in the Editor. It will expose the functions:
 
- - `RED.plugins.register(id,definition)` - called by plugins to register themselves
- - `RED.plugins.get(id)` - get a plugin by identifier
- - `RED.plugins.getByType(type)` - get all plugins of a particular type (using the optional `type` field in the plugin definition)
+ - `RED.plugins.registerPlugin(id,definition)` - called by plugins to register themselves
+ - `RED.plugins.getPlugins(id)` - get a plugin by identifier
+ - `RED.plugins.getPluginsByType(type)` - get all plugins of a particular type (using the optional `type` field in the plugin definition)
 
 TODO: there may be other APIs to expose
 
