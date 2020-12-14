@@ -232,7 +232,30 @@ Property name : `_UI_GROUP`
 
 UI_SUBGROUP_I instance node sets the value specified in the corresponding SUBFLOW instance _UI_GROUP property to the value specified in group.
 
+### Add features for UI modules to Node-RED
+
+To support UI module function, Node-RED must have the following additions.
+
+1. Acquisition of subflow information
+
+  - Additional functions  
+   Server-side RED.nodes.getNode () supports getting subflow instance information.
+  - Background  
+  When displaying the widget, get the Config node information added to the UI module based on the subflow information.
+   It is necessary to get the subflow information from the ID of the subflow instance that the widget node has.
+   The current API returns a null value and cannot get the subflow information.
+
+2. Node ID remapping on flow import
+
+ - Function addition  
+    Defaults HTML definition extension adds definition of subflow node-to-node relationships.
+ - Background  
+   The Config node for the UI Module has a one-to-one reference with the subflow.Get a reference to the UI Module Config node based on the subflow instance ID that the widget has.
+
+See below for details.　[Add features for UI Module](https://github.com/node-red-hitachi/node-red-notes/blob/master/Teleconference/20201124/08-Add_features_for_UI_Module.pptx)
+
 ## History
 
   - 2020-02-10 - Initial Design Note
   - 2020-07-29 - Update Design Note
+  - 2020-12-14 - Added about the required Node-RED additional function 
