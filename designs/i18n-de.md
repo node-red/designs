@@ -21,7 +21,7 @@ For the translation to german there should apply the following rules:
    * Es kann davon ausgegangen werden, dass er gängige IT-Begriffe und -Vorgänge und deren Bedeutung kennt (z.B. Download, Upload, Speichern, ...), sodass diese nicht weiter erläutert werden müssen. (It can be assumed that he knows common IT terms and processes and their meaning (e.g. download, upload, save, ...) so that they do not have to be explained further.)
    * IT-Spezialistenwissen sollte dagegen ausführlicher umschrieben werden (z.B. Node-RED- und Git-Begriffe). (IT specialist knowledge, however, should be described in more detail (e.g. Node-RED and Git terms))
 0. Begriffe sollen möglichst einheitlich übersetzt werden, soweit möglich/sinnvoll (Terms should be consistent translated as possible/sensible). Siehe/see [dictionary.csv](i18n-de/dictionary.csv).
-0. Zweifelsfälle in der deutschen Gemeinschaft besprechen und von ihr Reviews durchführen lassen (Discuss cases of doubt in the german cummunity and let them do reviews): [https://node-red.slack.com/archives/CK09P5RHR Slack-channel i18n-de]
+0. Zweifelsfälle in der deutschen Gemeinschaft besprechen und von ihr Reviews durchführen lassen (Discuss cases of doubt in the german cummunity and let them do reviews): [Slack-channel i18n-de](https://node-red.slack.com/archives/CK09P5RHR)
 0. Eigennamen werden 1:1 übernommen (Proper names will overtaken 1:1). Beispiele/Examples:
    * Node-RED
    * Namen von Nodes (Names of Nodes)
