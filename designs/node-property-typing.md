@@ -57,8 +57,13 @@ Unlike the link nodes, these nodes can reference any node type. This design prop
 this could be expressed as follows.
 
 ```
-scope: { type: ":any[]"}
+scope: { type: "*[]"}
 ```
+
+*Note: an earlier iteration of this design proposed `:any[]`. That was inspired
+by TypeScript's `any` syntax, but the `:` was added to make it look like a keyword -
+as `any` would be a valid node-type. On second though, this didn't look right, so
+has been changed to the above syntax.*
 
 #### Node references a single node of multiple possible types
 
@@ -72,13 +77,14 @@ The following sytanx could used to list the candidate types:
 ui_container: { type: "ui_group | ui_widget"}
 ```
 
+#### Node references multiple nodes of multiple possible types
 
-
-
-
-
+```
+ui_container: { type: "(ui_group | ui_widget)[]"}
+```
 
 
 ## History
 
+- 2021-01-07 Updated syntax
 - 2020-09-29 Initial design drafted
