@@ -109,6 +109,8 @@ This is an area where the design may evolve over future versions.
 
 ### HTTP Admin API
 
+#### `/settings`
+
 The list of configured libraries is added to the `/settings` end point. The default
 value is:
 
@@ -144,10 +146,41 @@ examples lib.
  - (not shown) `icon`: an optional FA-icon identifier.
 
 
+A 'user-configurable' library is one the user has added via the editor UI. The default
+libraries and any configured via the settings file are *not* user-configurable.
 
-*TODO: define the APIs to support adding/configuring new library sources in the editor*
+
+#### `/library/:id`
+
+***This is not in the plan for 1.3 - we'll revisit it in the future***
+
+This new admin endpoint will return information about a specific library.
+
+The object returned will match those returned by the `/settings` endpoint under
+the `libraries` object.
+
+In the case of user-configurable libraries, it will include an additional property:
+
+ - `config`: a key/value object of configurable properties for the library.
+
+If any of the configuration properties are flagged as `password` type properties,
+rather than return the value, it will include a property with the name `has_<property-name>`
+as a boolean to indicate whether the runtime has a value stored or not. This is
+inline with how flow credentials are handled and the general principle of never
+returning passwords back to the editor.
+
+To update the configuration of a user-configurable library, a `PUT` HTTP Request
+can be sent to the same endpoint with the updated object.
+
+#### `/library/:id/:type`
+
+This is the existing endpoint used to browse the contents of the library for a given
+type of object.
+
 
 ### `@node-red/runtime` API
+
+***This is not in the plan for 1.3 - we'll revisit it in the future***
 
 *TODO: define the APIs to support adding/configuring new library sources in the editor*
 
@@ -163,9 +196,8 @@ editorTheme: {
             {
                 id:   "team-dir",
                 type: "node-red-library-filestore",
-                name: "team-dir",
+                label: "my team-dir",
                 path: "/tmp/nr-lib/"
-
             }
         ]
     }
@@ -175,11 +207,11 @@ editorTheme: {
 For each source:
  - `id` : unique identifier for the library source instance
  - `type`: the type of library plugin this is an instance of
+ - `label`: how the library is labelled in the UI
  - ... anything else is then plugin-specific configuration.
 
 Any source defined in the settings file will get its `user` property set to `false`
 as it cannot be reconfigured in the editor.
-
 
 
 
