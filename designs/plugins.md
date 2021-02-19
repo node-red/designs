@@ -125,7 +125,78 @@ For this feature then, there are some use cases to consider:
 
 The details of this are being [discussed here](https://github.com/node-red/designs/discussions/40).
 
+### Plugin Settings
 
+A plugin may expect some settings to be provided via `settings.js`. As it stands,
+a runtime plugin has full access to the `RED.settings` object so will be able to
+access anything in there.
+
+There is a question over how an editor plugin is able to access settings.
+
+We already provide a [mechanism for nodes to do this](https://nodered.org/docs/creating-nodes/node-js#exposing-settings-to-the-editor)
+when their runtime code calls `RED.nodes.registerType`.
+
+Plugins should use a similar mechanism for consistency. Although there is a question
+of whether it can be improved to provide some more flexibility.
+
+The key requirement is how to tell the runtime to make certain settings available
+to the editor.
+
+To help organise the settings file, it is probably better to group plugin settings
+together.
+
+Lets say the plugin with id 'my-plugin' has three settings - 'color', 'shape' and 'size'
+
+With the existing node setting scheme, you'd end up with three settings `myPluginColor`,
+`myPluginShape` and  `myPluginSize`.
+
+It would be cleaner to have a single top-level property that matches the plugin id
+and then group the settings under that:
+```
+"my-plugin": {
+    color: ...
+    shape: ...
+    size:
+}
+```
+
+the `settings` property in the plugin definition could then look like:
+```
+settings: {
+    color: { value: "red", exportable: true},
+    shape: { value: "square", exportable: true},
+    size: { value: "big", exportable: true},
+}
+```
+
+However, this does require the plugin to pre-declare all possible settings. In the
+case of something like `nrlint`, the single top-level setting may used to collect
+settings of sub-plugins as well.
+
+So the following would be supported:
+
+```
+settings: {
+    "*": { exportable : true},
+    "color": { exportable: false}
+}
+```
+
+This will cause all settings under the plugin name to be exported, but also allow
+for individual settings to be held back.
+
+Another example:
+```
+settings: {
+    "editor": { exportable : true},
+    "runtime": { exportable: false}
+}
+```
+
+would allow for a clear separation of settings for the runtime and editor.
+
+We should consider updating the node settings naming to allow for this pattern
+as well.
 
 ### HTTP Admin API
 
