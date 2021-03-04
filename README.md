@@ -34,6 +34,7 @@ with enough detail to review the intent and direction of the feature.
  - [Exportable Subflow](designs/exportable-subflow/README.md)
  - [Node Timeout API](designs/timeout-api.md)
  - [Overwrite Values in settings.js](designs/overwrite-settings.md)
+ - [Add Health and Status Endpoints to Admin API](designs/admin-api-health-status.md)
 
 #### In-progress
 
