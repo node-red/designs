@@ -30,11 +30,6 @@ If the delay node additionally supports msg.rate to set rate value and msg.queue
 
   The enhanced delay node supports nodeMessageBufferMaxLength as the default buffer length.
   The buffer length needs to be greater than queue length defined in msg.queueLength or node property UI.
-
-- enableCustomQueueLength (default: false) *[Newly added]*
-
-  When the enableCustomQueueLength value is true, the node property UI of the enhanced delay node shows enableCustomQueueLength as the text input.
-  The default value is 0 because the current implementation doesn't use the queue.
  
   ![nodepropertyui.png](nodepropertyui.png)
 
@@ -56,12 +51,6 @@ If the delay node additionally supports msg.rate to set rate value and msg.queue
 
   The enhanced delay node overwrites the existing rate value defined in the node property UI when it receives the message which contains msg.rate value.
   To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the rate using msg.rate.
-
-- msg.nodeMessageBufferMaxLength: property in message to change buffer length *[Newly added]*
-
-  The enhanced delay node overwrites buffer length according to msg.nodeMessageBufferMaxLength value which received message has.
-  If the number of messages in the buffer is greater than the buffer length in the msg.nodeMessageBufferMaxLength, the last messages will be deleted.
-  To be aware of changing the value when tracing, the messages about changed rate value should be outputted to log stream after changing the buffer length using msg.nodeMessageBufferMaxLength.
 
 ### Properties
  The enhanced delay node newly has queueLength as a node property.
