@@ -198,6 +198,38 @@ would allow for a clear separation of settings for the runtime and editor.
 We should consider updating the node settings naming to allow for this pattern
 as well.
 
+### Plugin Resources
+
+Plugins may want to provide additional resources to the editor, such as extra JS,
+CSS or images. To remove the need for them to create http endpoints, we will introduce
+a new way for both Plugins and Nodes to provide such content.
+
+In the same manner as `icons` and `examples`, if there is a directory called `resources`
+at the root of the package tree, the runtime will automatically expose that directory under
+the path:
+
+```
+/resources/<module-name>/path-to-resource
+```
+
+For example, if a plugin called `test-plugin-module` has the file structure:
+
+```
+ |- package.json
+ |- plugin.js
+ |- plugin.html
+ \- resources
+     |- script.js
+     \- css
+         \- style.css
+```
+
+The resource files will be accessible via the paths:
+
+  - `/resources/test-plugin-module/script.js`
+  - `/resources/test-plugin-module/css/style.css`
+
+
 ### HTTP Admin API
 
  - `GET /plugins`
