@@ -117,7 +117,7 @@ Structure of data stored in PouchDB:
 
 - Data is saved in the JSON object format supported by PouchDB. The plugin does not convert JSON data to a string for storage.
 
-- Code example that references database data:
+Code example that references database data :
 ```javascript
 var pd = require('pouchdb');
 pd.plugin(require('pouchdb-adapter-node-websql'));
@@ -141,7 +141,7 @@ This allows you to back up the data stored in your local SQLite to a remote Couc
 
 - In an environment with multiple context stores, only contexts using the PouchDB plugin will be backed up.
 
-Code example of replication to remote database (CouchDB)ÅF
+Code example of replication to remote database(CouchDB) :
 ```javascript
 var pd = require('pouchdb');
 pd.plugin(require('pouchdb-adapter-node-websql'));
@@ -163,7 +163,7 @@ Reference: [PouchDB replication](https://pouchdb.com/api.html#replication)
 
 - Replication can also be filtered.You can also consider replicating a partial database (for example, only the global context part).
 
-Example of replication filtering in global context:
+Code example of replication filtering in global context :
 ```javascript
 db_source.replicate.to(db_target, {
   filter: function (doc) {
