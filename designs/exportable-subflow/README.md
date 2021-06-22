@@ -80,13 +80,17 @@ Following is a list of properties exported SUBFLOW node in SUBFLOW Template may 
 | 5    | color+  | string | color of SUBFLOW                   |
 | 6    | version | string | version of SUBFLOW (format: x.y.z) |
 | 7    | author+ | string | author of SUBFLOW                  |
-| 8    | license+ | string | license of SUBFLOW                 |
-| 9    | keywords+ | array  | array of keywords of SUBFLOW       |
-| 10   | description+ | string | simple description of SUBFLOW      |
+| 8    | license+ | string | license of SUBFLOW                |
+| 9    | keywords+ | array  | array of keywords of SUBFLOW     |
+| 10   | description+ | string | simple description of SUBFLOW |
+| 10   | exportName+ | string | export name of SUBFLOW         |
 
 Exported SUBFLOW Template can be **sealed** which means that internal of the SUBFLOW Template is hidden from users.  
 
 If imported **seald** SUBFLOW Template includes other SUBFLOW Templates, **hidden** property of these templates are set to true and these SUBFLOW Templates are not shown in editor pallette.
+
+For example, suppose SUBFLOW template `S0` uses other SUBFLOW template `S1`.  If `S0` is exported in **sealed** + **include all** mode and, exported JSON representation contains `S0` and `S1`.
+If this JSON representation is imported in another Node-RED instance, `S0` (**sealed**) is not editable and shown in pallette list.  `S1` (**sealed** and **hidden**) is not listed in pallette list and only used internally in `S0`.  This is intended to hide SUBFLOWs used as internal parts of exported SUBFLOW from the user.
 
 `flow` property is an array of nodes that are used in its SUBFLOW template.  *id* of nodes in SUBFLOW template must be *name*-*ID* where *ID* is a original *id* of the node.
 
@@ -108,3 +112,4 @@ Extended properties are ignored if they are imported to older version of Node-RE
   - 2019-02-27 - migrated from Design note wiki
   - 2019-07-26 - updated according to design discussion on early July
   - 2019-09-06 - updated accodring to design discussion on Sep. 4th
+  - 2019-10-24 - updated description sealed SUBFLOW and add exportName to SUBFLOW property
