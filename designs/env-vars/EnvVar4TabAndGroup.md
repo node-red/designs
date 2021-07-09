@@ -8,7 +8,6 @@ state: in-progress
 
 Environment variable is useful for customizing SUBFLOW’s behavior. It supports hierarchical propagation from enclosing SUBFLOW to enclosed SUBFLOW.  This means that setting the same value for multiple SUBFLOW instances is difficult without nesting.
 
-Setting the same value for multiple SUBFLOW instances is difficult without nesting.
 Also, there is no direct means for specifying top-level values except OS environment variable.
 
 Thus, this design note proposes ability to define environment variable in groups or tabs. 
