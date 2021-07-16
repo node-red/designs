@@ -37,21 +37,25 @@ This design is to extend the basic use of the existing delay node to allow it to
 
 The existing node only removes things from the array(queue) based on time. The only control the user has is to either reset or flush the entire queue.
 
-### Proposal 1 - PR3059
+### Proposal 1 - PR3059 (merged)
 
 The initial proposal is to add mode control the the existing flush operation. Rather than just being a flag, allow `msg.flush` to accept a numeric value of item to remove from the queue. And at the same time change the node-status to reflect the depth of the queue. This allows several new scenarios to be relisable - namely the ability to feedback into the node and release the next message(s), and monitor the depth of the queue.
 
-### Next steps
+### Proposal 2 - PR3069
 
-As the current node is based around a simple array the obvious operations are push, pop, shift and unshift. The current modes use push to add to the end of the queue, and shift to remove items from the front of the queue.
+As the current rate limit function is based around a simple array the obvious operations are push, pop, shift and unshift. The current mode uses push to add to the end of the queue, and shift to remove items from the front of the queue.
 
 The node could be expanded to allow access to the other methods such as unshift to force an item to the head of the queue. This would then let a process create a retry by pushing any failed message back into the queue - and if combined with the new flush:1 ability from PR3059 would retry immediately.
 
 Pushing to the front of the queue would also allow the creation of LIFO (Last In First Out) type queues ie a stack... (vs the existing FIFO style).
 
-For this I propose adding a property `msg.lifo` a boolean flag that if true would unshift the corresponding message to the fornt of the array.
+For this I propose adding a property `msg.lifo` a boolean flag that if true would unshift the corresponding message to the front of the array.
+
+*Note*: This flag makes no sense for other modes of operation - standard delays are all just timer based so you can (if allowed) set the msg.rate to be really short to make it come out more quickly. And in rate limit mode if you select drop interediate messages then by default no other messages are accepted until the next time slot. (The queue is never more than 1 deep).
 
 ### Other possibilities include
+
+    - allow a TTL (time to live) for a message in the queue - if it expires the message removes itself from the queue.
 
     - access to array pop capability... not sure of a use case apart from to remove from end of queue in which case why not use split.
 
