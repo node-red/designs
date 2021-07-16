@@ -49,7 +49,7 @@ The node could be expanded to allow access to the other methods such as unshift 
 
 Pushing to the front of the queue would also allow the creation of LIFO (Last In First Out) type queues ie a stack... (vs the existing FIFO style).
 
-For this I propose adding a property `msg.lifo` a boolean flag that if true would unshift the corresponding message to the front of the array.
+For this I propose adding a property `msg.toFront` a boolean flag that if true would unshift the corresponding message to the front of the array.
 
 *Note*: This flag makes no sense for other modes of operation - standard delays are all just timer based so you can (if allowed) set the msg.rate to be really short to make it come out more quickly. And in rate limit mode if you select drop interediate messages then by default no other messages are accepted until the next time slot. (The queue is never more than 1 deep).
 
