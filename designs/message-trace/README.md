@@ -69,28 +69,56 @@ node.metric("correlate", msg, {relationType: relatedMsgIds})
 ```
 where:
 - msg: message in process.  For example, when join node send a concatenated message, use the message as an argument of `node.metric()`.
-- relationType: a relation type, such as `join`, `splitInto`, `isDependsOn`, etc.
+- relationType: a relation type, such as `join`, `split`, `isDependsOn`, etc.
 - relatedMsgIds: array of ids of related messages.
 
 For example, in Join node, the metric is emitted at end of each completion of message joining process:
 ```
 var completeSend = function(partId) {
     ...
-    // (assume the module maintains message Ids of combined messages in group.combinedMsgInfo[].id)
-    node.send(RED.util.cloneMessage(group.msg));
-    node.metric("correlate", group.msg, {join: group.combinedMsgInfo.map(e=>e.id)});
+    // (assume the module maintains message Ids of combined messages in group.corrIds
+    node.send(RED.util.cloneMessage(group.msg)); //...
+    node.metric("correlate", group.msg, {join: group.corrIds});
 }
-``` 
-(from https://github.com/node-red/node-red/blob/master/packages/node_modules/%40node-red/nodes/core/sequence/17-split.js#L483).
+```
 
 ### Usage example
 
 For the example shown in Use cases, the proposed metric logging makes message traceable.  
 
-![Correlation](correlationlog.svg)
+#### Example 1: Ordinal case in Split/Join
 
-- by `node.join.correlate` event, we can assume that message X is joined with message Y and Z.
-- by `node.join.done` event, we can assume that processing of message X, Y and Z are completed.
+Sample flow:
+![Example Flow 1](./exflow1.png)
+
+Metric log output:
+![Example Output 1](./exlog1.png)
+
+- by `node.split.correlate` event, we can assume that `msgA` is split into `msgB`, `msgC` and `msgD`.
+- by `node.split.done` event, we can assume that processing of `msgA` is completed.
+- by `node.join.correlate` event, we can assume that `msgE` is joined with `msgB`, `msgC` and `msgD`.
+- by `node.join.done` event, we can assume that processing of `msgB` through `msgE` are completed.
+
+#### Example 2: Split combines multiple received messages
+
+Sample flow:
+![Example Flow 2](./exflow2.png)
+
+Metric log output: 
+![Example Output 2](./exlog2.png)
+
+- There are three `node.split.correlate` event, which have same `relatedMsgIds` value.  This is because Split node receives three messages, and it combines them to a single message.
+
+#### Example 3: More complex relations
+
+Sample flow:
+![Example Flow 2](./exflow3.png)
+
+Metric log output:
+![Example Output 3](./exlog3.png)
+
+- In the correlation events, `msgC` and `msgE` are appeared twice.  This is because `msgB` is split into `msgC` and `msgE`, which also contain payloads of `msgA` and `msgD`, respectively. 
+
 
 ## Related topics
 
@@ -101,4 +129,5 @@ For the example shown in Use cases, the proposed metric logging makes message tr
 ## History
 
 - 2020-07-14 - Initial proposal submitted
+- 2021-08-16 - Update usage example
 
