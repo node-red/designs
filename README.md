@@ -35,7 +35,7 @@ with enough detail to review the intent and direction of the feature.
  - [Node Timeout API](designs/timeout-api.md)
  - [Overwrite Values in settings.js](designs/overwrite-settings.md)
  - [Admin API Authentication](designs/admin-api-authentication.md)
- - [Standalone Node-RED](designs/standalone-nodered/README.md)
+ - [Node-RED installer](designs/standalone-nodered/README.md)
 
 #### In-progress
 
