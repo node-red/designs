@@ -219,11 +219,15 @@ Test events are defined for test case and test target nodes. List of actions are
   
   - setup: executed at start of the test case,
   
+  - success: executed after successful execution of the node,
+  
   - fail: executed after failed execution of the test case,
   
   - cleanup: executed at end of the test case,
   
   - timeout: executed after timeout reached for the test case.
+  
+  - exception: executed after occurrence of exception while executing the node,
 
 - Test case events - No events specific to a test case exists.
 
@@ -236,16 +240,6 @@ Test events are defined for test case and test target nodes. List of actions are
   - stubbed execution: executed after *receive* event instead of message processing of the node,
   
   - send: executed after sending message from the node to output port,
-  
-  - success: executed after successful execution of the node,
-  
-  - fail: executed after failed execution of the node,
-  
-  - exception: executed after occurence of exception while executing the node,
-  
-  - cleanup: executed at end of the test case,
-  
-  - timeout: executed after timeout reached for the test case.
 
 ### Test Actions
 
@@ -257,7 +251,9 @@ Test events are defined for test case and test target nodes. List of actions are
   
   - log - log message,
   
-  - function - write complex testing using JavaScript code.
+  - function - write complex testing using JavaScript code,
+  
+  - click - click button of specified node.
 
 - Test case actions
   
@@ -270,8 +266,6 @@ Test events are defined for test case and test target nodes. List of actions are
   - set - set message property or context,
   
   - send - send message to output port,
-  
-  - pass - pass input message message to output port,
   
   - catch - catch exception,
   
@@ -335,18 +329,36 @@ After starting Node-RED in the test mode, users can turn off/on the mode on the 
 This flow testing needs to be run on the CLI for targeting to run automatically on Travis CI when receiving a pull request on GitHub.
 When running a command like `grunt test-flow`, Node-RED runs flow testing then outputs each result such as the existing Mocha tests.
 
-[H.N.] Node-RED provides command line option for running test suitesfor CLI testing.
+[H.N.] Node-RED provides command line option for running test suites for CLI testing.
 `-t test1,test2,...` runs test suites `test1`, `test2`, ....
+
+## Extending Actions
+
+Flow testing supports addition of test actions using [plugin mechanism]([designs/plugins.md at master · node-red/designs · GitHub](https://github.com/node-red/designs/blob/master/designs/plugins.md)).  It would be useful for adding actions:
+
+- testing files,
+
+- taking screenshot of Node-RED editor,
+
+- testing GUI interactions, 
+
+- ...
 
 ## Concerns
 
 - How to test dashboard nodes from flow testing? (it may be impossible)
+  → Use plugin support of actions for controlling GUI
 - We will add how to run on the CLI. (arguments, example, etc)
+
+## Implementation Note
+
+Look over [here](ImplementationNote.md) for implementation notes.
 
 ## History
 
+- 2021-12-08 - Add extension mechanism and implementation note.  Refine events definition.
 - 2021-05-28 - Updated proposal
 - 2020-07-17 - Add Concepts section
 - 2020-06-09 - Add requirements
 - 2020-04-13 - Updated proposal
-- 2020-01-31 - Initial proposal###
+- 2020-01-31 - Initial proposal
