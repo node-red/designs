@@ -8,9 +8,9 @@ state: draft
 
 With current Node-RED, multiple clients can connect to the same runtime and can edit the same flow independently.  However, editing results by multiple clients are not synchronized, so conflicts of flows occur during deployment of the flow.  There is a feature to support merging flow conflicts referring node property values, but it is difficult for end users to merge node properties in proper way.
 
-![conflict-detection.png](/Users/nisiyama/src/Curry/Git/designs/designs/simultaneous-edit/images/conflict-detection.png)
+![conflict-detection.png](./images/conflict-detection.png)
 
-![review-change.png](/Users/nisiyama/src/Curry/Git/designs/designs/simultaneous-edit/images/review-change.png)
+![review-change.png](./images/review-change.png)
 
 Therefore, this design document proposes a new Node-RED editor feature that supports multiple clients to edit the same flow simultaneously.
 
@@ -52,7 +52,7 @@ Here, we consider the following two methods as candidates for simultaneous editi
   
   - Changes other than the flow should also be treated as editing actions to be sent.  However, it is necessary not to execute anything that involves a run-time operation.
 
-![synchronize-actions.png](/Users/nisiyama/src/Curry/Git/designs/designs/simultaneous-edit/images/synchronize-actions.png)
+![synchronize-actions.png](./images/synchronize-actions.png)
 
 - We may need to synchronize client state at some point by sending refresh request to all client.
 
@@ -76,8 +76,8 @@ Lock the flow edit target of client A in order to suppress or notify the edit by
 
 - Place a button to lock the tab on the settings panel of each tab.
   
-  ![lock-button.png](/Users/nisiyama/src/Curry/Git/designs/designs/simultaneous-edit/images/lock-button.png)
-
+  ![lock-button.png](./images/lock-button.png)
+  
   The lock button expected to have the following states:
 
 | Tab State | Button Label | Description                   |
@@ -86,7 +86,7 @@ Lock the flow edit target of client A in order to suppress or notify the edit by
 | Owned     | Unlock       | Tab is locked by this client  |
 | Locked    | Locked       | Tab is locked by other client |
 
-![states.png](/Users/nisiyama/src/Curry/Git/designs/designs/simultaneous-edit/images/states.png)
+![states.png](./images/states.png)
 
     
 
