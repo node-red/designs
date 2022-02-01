@@ -114,7 +114,7 @@ Lock the flow edit target of client A in order to suppress or notify the edit by
 
 - Compared with method 2, method 1 has to serialize and broadcast the edit actions to all connected clients. This may cause a performance concern when the number of clients increases.  
   
-  However, this method seems to be more intuitive for users.  So, I would like to recommend this method as a means for simultaneous flow editing.
+  However, method  1 seems to be more intuitive for users.  So, I would like to recommend this method as a means for simultaneous flow editing.
 
 ## History
 
