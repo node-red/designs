@@ -338,6 +338,23 @@ When running a command like `grunt test-flow`, Node-RED runs flow testing then o
 [H.N.] Node-RED provides command line option for running test suitesfor CLI testing.
 `-t test1,test2,...` runs test suites `test1`, `test2`, ....
 
+## Extending Actions
+
+Flow testing supports addition of test actions using [plugin mechanism]([designs/plugins.md at master · node-red/designs · GitHub](https://github.com/node-red/designs/blob/master/designs/plugins.md)).  It would be useful for adding actions:
+
+- testing files,
+
+- taking screenshot of Node-RED editor,
+
+- testing GUI interactions, 
+
+- ...
+
+### Extensions & GUI Testing
+
+See the following [design notes](GUI-test.md) for extending the flow test plugin and adding actions for GUI testing.
+
+
 ## Concerns
 
 - How to test dashboard nodes from flow testing? (it may be impossible)
@@ -345,6 +362,7 @@ When running a command like `grunt test-flow`, Node-RED runs flow testing then o
 
 ## History
 
+- 2022-02-10 - Add extensions & GUI Testing
 - 2021-05-28 - Updated proposal
 - 2020-07-17 - Add Concepts section
 - 2020-06-09 - Add requirements
